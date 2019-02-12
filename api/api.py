@@ -21,7 +21,7 @@ def __signup__():
 
 
 @app.route('/createswimmer/<number>')
-def __swimmer_generator__(number):
+def __swimmer_creation__(number):
 	return account.swimmer_creation(number)
 
 
