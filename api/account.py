@@ -27,8 +27,9 @@ def register(data):
                                            dob, gender, address, phone, email, role_id, is_verified)
                          VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''',
                       (obj_data.coach.username, obj_data.coach.password, obj_data.coach.first_name,
-                       str(datetime.datetime.now()), obj_data.coach.last_name, obj_data.coach.dob, 
-                       obj_data.coach.gender, obj_data.coach.address, obj_data.coach.phone, 
+                       str(datetime.datetime.now()
+                           ), obj_data.coach.last_name, obj_data.coach.dob,
+                       obj_data.coach.gender, obj_data.coach.address, obj_data.coach.phone,
                        obj_data.coach.email, 1, 0))
             db.commit()
             return jsonify({'result': {'status': 'success'}})
@@ -40,34 +41,43 @@ def register(data):
 def swimmer_creation(number_of_swimmer):
     db, c = connector.connection()
     my_account_list = ""
-    for i in range(int(number_of_swimmer)):
-        print(i)
+    i = 0
+    while i < int(number_of_swimmer):
         rand_num = str(randint(1000, 9999))
         this_year = str(datetime.datetime.now().year)  # get this year
         randuser = 'st' + this_year + '_' + rand_num
         c.execute('''SELECT username
                  FROM user
                  WHERE username = %s''', randuser)
-        print(randuser)
         my_username = c.fetchall()
-        print(my_username)
         if not my_username:
             try:
                 c.execute('''INSERT INTO user (username, password, role_id, is_verified, created_at)
                              VALUES (%s, %s, %s, %s, %s)''',
-                             (randuser, '1', 2, 0, str(datetime.datetime.now())))
-                my_account_list += (randuser + '\n' + '1' + '\n' + '-'*40 + '\n')
+                          (randuser, '1', 2, 0, str(datetime.datetime.now())))
+                my_account_list += ('tai khoan: ' + randuser +
+                                    '\n' + 'mat khau: ' + '1' + '\n' + '-' * 40 + '\n')
                 db.commit()
             except:
                 db.rollback()
                 return jsonify({'result': {'status': 'fail'}})
+            i += 1
     f = open('swimmer.txt', 'w')
-    f.write('-'*40 + '\n' + my_account_list)
+    temp = '-' * 40 + '\n' + my_account_list
+    encoded = base64.b64encode(temp.encode())
+    f.write(str(encoded.decode()))
     return jsonify({'result': {'status': 'success'}})
 
 
-def delete_swimmer(data):
-    pass
+def delete_swimmer(username):
+    db, c = connector.connection()
+    try:
+        c.execute('''DELETE FROM user
+                     WHERE username = %s''', username)
+        db.commit()
+    except:
+        db.rollback()
+        return jsonify({'result': {'status': 'fail'}})
 
 
 def login(data):
@@ -134,7 +144,6 @@ def edit_info(username, data):
     obj_data = json2obj(dumps(data))
     c.execute('SELECT role_id FROM user WHERE username = %s', username)
     my_role = c.fetchall()
-    print(my_role[0][0])
     if my_role[0][0] == 1:
         try:
             c.execute('''UPDATE user
