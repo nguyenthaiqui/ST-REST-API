@@ -8,9 +8,7 @@ import connector
 from flask import jsonify
 import json
 from collections import namedtuple
-
-
-
+import JSONObject
 
 def add(username, data):
     """recieve json with key(name,age)
@@ -19,21 +17,15 @@ def add(username, data):
     c.execute("SELECT id FROM user WHERE username = %s", username)
     myData = c.fetchall()
     if myData:
-        team = json.dumps(data)
-        object_team = json.loads(team, object_hook=lambda d: namedtuple('TEAM', d.keys())(*d.values()))
-        c.execute("SELECT name FROM team WHERE coach_id = %s AND name = %s", (myData[0][0],object_team.team.name))
+        object_data = JSONObject.json2obj(json.dumps(data))
+        c.execute("SELECT name FROM team WHERE coach_id = %s AND name = %s", (myData[0][0], object_data.team.name))
         if not c.fetchall():
             sql = "INSERT INTO team (coach_id,name,age) VALUES (%s, %s, %s)"
-            value = (myData[0][0], object_team.team.name, object_team.team.age)
+            value = (myData[0][0], object_data.team.name, object_data.team.age)
             c.execute(sql, value)
-            c.execute("SELECT id FROM team WHERE name = %s", object_team.team.name)
-            myData2 = c.fetchall()
-            sql2 = "INSERT INTO `team-swimmer` (user_id,team_id) VALUES(%s, %s)"
-            value2 = (myData[0][0], myData2[0][0])
-            c.execute(sql2, value2)
             db.commit()
             return jsonify({"result": "success"})
-        return jsonify({"result":"team name exist"})
+        return jsonify({"result": "team name exist"})
     return jsonify({"result": "fail"})
 
 
@@ -57,16 +49,14 @@ def edit(username, team_name, data):
     c.execute("SELECT id FROM user WHERE username = %s", username)
     myData = c.fetchall()
     if myData:
-        team = json.dumps(data)
-        object_team = json.loads(team, object_hook=lambda d: namedtuple('TEAM', d.keys())(*d.values()))
+        object_data = JSONObject.json2obj(json.dumps(data))
         c.execute("SELECT name FROM team WHERE coach_id = %s AND name = %s", (myData[0][0], team_name))
         if c.fetchall():
-            team = json.dumps(data)
-            object_team = json.loads(team, object_hook=lambda d: namedtuple('TEAM', d.keys())(*d.values()))
-            c.execute("UPDATE team SET name = %s, age =%s WHERE coach_id = %s AND name = %s", (object_team.team.name, object_team.team.age, myData[0][0],team_name))
+            c.execute("UPDATE team SET name = %s, age =%s WHERE coach_id = %s AND name = %s",
+                      (object_data.team.name, object_data.team.age, myData[0][0], team_name))
             db.commit()
             return jsonify({"result": "success"})
-        return jsonify({"result":"not found"})
+        return jsonify({"result": "not found"})
     return jsonify({"result": "fail"})
 
 
@@ -81,5 +71,15 @@ def delete(username, team_name):
         return jsonify({"result": "success"})
     return jsonify({"result": "fail"})
 
-
+def addSwimmer(username,team_name,data):
+    db,c = connector.connection()
+    c.execute("SELECT id FROM team WHERE name =%s", team_name)
+    myData = c.fetchall()
+    if myData:
+        object_data = JSONObject.json2obj(json.dumps(data))
+        for i in object_data.user.id :
+            c.execute("INSERT INTO `team-swimmer` (user_id,team_id) VALUES (%s,%s)",(i,myData[0][0]))
+        db.commit()
+        return jsonify({"result":"success"})
+    return jsonify({"result":"fail"})
 
