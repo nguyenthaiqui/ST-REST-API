@@ -1,3 +1,10 @@
+'''
+@author: Evan
+@email: lenguyenhoangvan18@gmail.com
+@version: 1.0
+@since: Feb 2, 2019
+'''
+# convert json to a python object
 import json
 from collections import namedtuple
 
