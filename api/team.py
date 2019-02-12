@@ -9,12 +9,13 @@ from flask import jsonify
 import json
 from collections import namedtuple
 
-db, c = connector.connection()
+
 
 
 def add(username, data):
     """recieve json with key(name,age)
         return json key (result)"""
+    db, c = connector.connection()
     c.execute("SELECT id FROM user WHERE username = %s", username)
     myData = c.fetchall()
     if myData:
@@ -38,6 +39,7 @@ def add(username, data):
 
 def view(username):
     """return list json with keys(id, coach_id, name, age)"""
+    db, c = connector.connection()
     c.execute("SELECT id FROM user WHERE username = %s", username)
     myData = c.fetchall()
     if myData:
@@ -51,6 +53,7 @@ def view(username):
 
 def edit(username, team_name, data):
     """recieve json with keys(name, age) return json with key(result)"""
+    db, c = connector.connection()
     c.execute("SELECT id FROM user WHERE username = %s", username)
     myData = c.fetchall()
     if myData:
@@ -68,6 +71,7 @@ def edit(username, team_name, data):
 
 
 def delete(username, team_name):
+    db, c = connector.connection()
     c.execute("SELECT id FROM user WHERE username = %s", username)
     myData = c.fetchall()
     if myData:
