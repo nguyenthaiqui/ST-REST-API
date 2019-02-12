@@ -39,24 +39,25 @@ def register(data):
 
 
 def swimmer_creation(number_of_swimmer):
+    """receive number of swimmer need to create"""
     db, c = connector.connection()
-    my_account_list = ""
+    my_account_list = "" # this string store account has been created
     i = 0
     while i < int(number_of_swimmer):
-        rand_num = str(randint(1, 9999)).zfill(4)
+        rand_num = str(randint(1, 9999)).zfill(4) # format 55 to 0055
         this_year = str(datetime.datetime.now().year)  # get this year
-        randuser = 'st' + this_year + '_' + rand_num
+        randuser = 'st' + this_year + '_' + rand_num # format st<year>_<random number>
         c.execute('''SELECT username
                  FROM user
                  WHERE username = %s''', randuser)
-        my_username = c.fetchall()
-        if not my_username:
+        my_username = c.fetchall() 
+        if not my_username: # check duplication
             try:
                 c.execute('''INSERT INTO user (username, password, role_id, is_verified, created_at)
                              VALUES (%s, %s, %s, %s, %s)''',
                           (randuser, '1', 2, 0, str(datetime.datetime.now())))
                 my_account_list += ('tai khoan: ' + randuser +
-                                    '\n' + 'mat khau: ' + '1' + '\n' + '-' * 40 + '\n')
+                                    '\n' + 'mat khau: ' + '1' + '\n' + '-' * 40 + '\n') # add account to string
                 db.commit()
             except:
                 db.rollback()
@@ -65,11 +66,12 @@ def swimmer_creation(number_of_swimmer):
     f = open('swimmer.txt', 'w')
     temp = '-' * 40 + '\n' + my_account_list
     encoded = base64.b64encode(temp.encode())
-    f.write(str(encoded.decode()))
+    f.write(str(encoded.decode())) # encode before store in a text file
     return jsonify({'result': {'status': 'success'}})
 
 
 def delete_swimmer(username):
+    """just delete a swimmer by his/her username"""
     db, c = connector.connection()
     try:
         c.execute('''DELETE FROM user
@@ -78,6 +80,7 @@ def delete_swimmer(username):
     except:
         db.rollback()
         return jsonify({'result': {'status': 'fail'}})
+    return jsonify({'result': {'status': 'success'}})
 
 
 def login(data):

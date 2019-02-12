@@ -5,7 +5,8 @@
 '''
 from flask import Flask, request
 import account
-
+import team
+import age
 app = Flask(__name__)
 
 
@@ -19,8 +20,8 @@ def __signup__():
     return account.register(request.get_json())
 
 
-@app.route('/swimmergenerator/<number>')
-def __swimmer_generator__(number):
+@app.route('/createswimmer/<number>')
+def __swimmer_creation__(number):
 	return account.swimmer_creation(number)
 
 
@@ -38,10 +39,34 @@ def __edit_profile__(username):
 def __change_password__(username):
     return account.change_password(username, request.get_json())
 
+@app.route('/age', methods=['GET'])
+def __get_age__():
+    return age.get()
+
+
+ # request is a json must have keys(name,age)
+@app.route('/team/<username>/add', methods=['POST'])
+def __add_team__(username):
+    return team.add(username, request.get_json())
+
+
+@app.route('/team/<username>/view')
+def __view_team__(username):
+    return team.view(username)
+
+
+@app.route('/team/<username>/<team_name>/edit', methods=['POST'])
+def __edit_team__(username, team_name):
+    return team.edit(username, team_name, request.get_json())
+
+
+@app.route('/team/<username>/<team_name>/delete')
+def __delete_team__(username, team_name):
+    return team.delete(username, team_name)
 
 @app.route('/')
 def __root__():
-    return "DEPLOYED"
+    return '<h1>Nắm bắt vận mệnh, khai phá thiên cơ</h1>'
 
 
 # running web app in local machine
