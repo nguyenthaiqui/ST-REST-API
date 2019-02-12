@@ -1,5 +1,5 @@
 '''
-@author: vanle, ntqui
+@author: Evan, Kabaji
 @version: 1.1
 @since: Jan 19, 2019
 '''

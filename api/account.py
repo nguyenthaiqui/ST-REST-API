@@ -43,7 +43,7 @@ def swimmer_creation(number_of_swimmer):
     my_account_list = ""
     i = 0
     while i < int(number_of_swimmer):
-        rand_num = str(randint(1000, 9999))
+        rand_num = str(randint(1, 9999)).zfill(4)
         this_year = str(datetime.datetime.now().year)  # get this year
         randuser = 'st' + this_year + '_' + rand_num
         c.execute('''SELECT username
