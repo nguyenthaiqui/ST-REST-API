@@ -1,6 +1,6 @@
 '''
-@author: vanle, ntqui
-@version: 1.1
+@author: Evan, Kabaji
+@version: 1.0
 @since: Jan 19, 2019
 '''
 import pymysql
