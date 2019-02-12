@@ -66,7 +66,7 @@ def __delete_team__(username, team_name):
 
 @app.route('/')
 def __root__():
-    return "DEPLOYED"
+    return '<h1>Nắm bắt vận mệnh, khai phá thiên cơ</h1>'
 
 
 # running web app in local machine
