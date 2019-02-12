@@ -50,17 +50,17 @@ def __add_team__(username):
     return team.add(username, request.get_json())
 
 
- @app.route('/team/<username>/view')
+@app.route('/team/<username>/view')
 def __view_team__(username):
     return team.view(username)
 
 
- @app.route('/team/<username>/<team_name>/edit', methods=['POST'])
+@app.route('/team/<username>/<team_name>/edit', methods=['POST'])
 def __edit_team__(username, team_name):
     return team.edit(username, team_name, request.get_json())
 
 
- @app.route('/team/<username>/<team_name>/delete')
+@app.route('/team/<username>/<team_name>/delete')
 def __delete_team__(username, team_name):
     return team.delete(username, team_name)
 
