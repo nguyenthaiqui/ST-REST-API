@@ -19,7 +19,7 @@ def __signup__():
     return account.register(request.get_json())
 
 
-@app.route('/swimmergenerator/<number>')
+@app.route('/createswimmer/<number>')
 def __swimmer_generator__(number):
 	return account.swimmer_creation(number)
 
