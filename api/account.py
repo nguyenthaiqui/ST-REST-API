@@ -53,9 +53,9 @@ def swimmer_creation(number_of_swimmer):
         my_username = c.fetchall() 
         if not my_username: # check duplication
             try:
-                c.execute('''INSERT INTO user (username, password, role_id, is_verified, created_at)
-                             VALUES (%s, %s, %s, %s, %s)''',
-                          (randuser, '1', 2, 0, str(datetime.datetime.now())))
+                c.execute('''INSERT INTO user (username, password, role_id, is_verified, created_at, dob)
+                             VALUES (%s, %s, %s, %s, %s, %s)''',
+                          (randuser, '1', 2, 0, str(datetime.datetime.now()), '2000-1-1'))
                 my_account_list += ('tai khoan: ' + randuser +
                                     '\n' + 'mat khau: ' + '1' + '\n' + '-' * 40 + '\n') # add account to string
                 db.commit()
