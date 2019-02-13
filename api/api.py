@@ -59,6 +59,9 @@ def __view_team__(username):
 def __edit_team__(username, team_name):
     return team.edit(username, team_name, request.get_json())
 
+@app.route('/team/<username>/<team_name>/add', methods=['POST'])
+def __add_swimmer__(username,team_name):
+    return team.addSwimmer(username,team_name,request.get_json()    )
 
 @app.route('/team/<username>/<team_name>/delete')
 def __delete_team__(username, team_name):
