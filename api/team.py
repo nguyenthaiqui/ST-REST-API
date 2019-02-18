@@ -3,12 +3,13 @@
 @version : 1.1
 @since : 23 Jan 2019
 """
+import base64
 
 import connector
 from flask import jsonify
 import json
-from collections import namedtuple
 import JSONObject
+
 
 def add(username, data):
     """recieve json with key(name,age)
@@ -71,15 +72,29 @@ def delete(username, team_name):
         return jsonify({"result": "success"})
     return jsonify({"result": "fail"})
 
-def addSwimmer(username,team_name,data):
-    db,c = connector.connection()
+
+def addSwimmer(team_name,f):
+    db, c = connector.connection()
     c.execute("SELECT id FROM team WHERE name =%s", team_name)
-    myData = c.fetchall()
-    if myData:
-        object_data = JSONObject.json2obj(json.dumps(data))
-        for i in object_data.user.id :
-            c.execute("INSERT INTO `team-swimmer` (user_id,team_id) VALUES (%s,%s)",(i,myData[0][0]))
-        db.commit()
-        return jsonify({"result":"success"})
-    return jsonify({"result":"fail"})
+    myTeamID = c.fetchall()
+    if myTeamID:
+        '''decode file swimmer.txt'''
+        temp = f.readline()
+        a = temp.encode("UTF-8")
+        decoded = base64.b64decode(a)
+        temp2 = str(decoded, encoding="UTF-8")
+        '''get id swimmer account and add to table `team-swimmer`'''
+        s = temp2.split("----------------------------------------\n");
+        i = 1;
+        while (s[i] != ""):
+            result = s[i].split()
+            user = result[2]
+            c.execute("SELECT id FROM user WHERE username = %s", user)
+            myUserID = c.fetchall()
+            if(myUserID):
+                c.execute("INSERT INTO `team-swimmer`(user_id,team_id) VALUES(%s,%s)",(myUserID[0][0],myTeamID[0][0]))
+                db.commit()
+            i += 1
+        return jsonify({"result": "success"})
+    return jsonify({"result": "fail"})
 
