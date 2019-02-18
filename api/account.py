@@ -11,6 +11,7 @@ from json import dumps
 from random import randint
 import datetime
 import base64
+import bcrypt
 
 
 def register(data):
@@ -22,11 +23,13 @@ def register(data):
                  WHERE username = %s''', obj_data.coach.username)
     my_username = c.fetchall()
     if not my_username:  # create mew account
+        hashed_pw = bcrypt.hashpw(
+            obj_data.coach.password.encode(), bcrypt.gensalt())  # hash password by bcrypt
         try:
             c.execute('''INSERT INTO user (username, password, first_name, created_at, last_name,
                                            dob, gender, address, phone, email, role_id, is_verified)
                          VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''',
-                      (obj_data.coach.username, obj_data.coach.password, obj_data.coach.first_name,
+                      (obj_data.coach.username, hashed_pw, obj_data.coach.first_name,
                        str(datetime.datetime.now()
                            ), obj_data.coach.last_name, obj_data.coach.dob,
                        obj_data.coach.gender, obj_data.coach.address, obj_data.coach.phone,
@@ -39,24 +42,25 @@ def register(data):
 
 
 def swimmer_creation(number_of_swimmer):
+    """receive number of swimmer need to create"""
     db, c = connector.connection()
-    my_account_list = ""
+    my_account_list = ""  # this string store account has been created
     i = 0
     while i < int(number_of_swimmer):
-        rand_num = str(randint(1000, 9999))
+        rand_num = str(randint(1, 9999)).zfill(4)  # format 55 to 0055
         this_year = str(datetime.datetime.now().year)  # get this year
-        randuser = 'st' + this_year + '_' + rand_num
+        randuser = 'st' + this_year + '_' + rand_num  # format st<year>_<random number>
         c.execute('''SELECT username
                  FROM user
                  WHERE username = %s''', randuser)
         my_username = c.fetchall()
-        if not my_username:
+        if not my_username:  # check duplication
             try:
-                c.execute('''INSERT INTO user (username, password, role_id, is_verified, created_at)
-                             VALUES (%s, %s, %s, %s, %s)''',
-                          (randuser, '1', 2, 0, str(datetime.datetime.now())))
+                c.execute('''INSERT INTO user (username, password, role_id, is_verified, created_at, dob)
+                             VALUES (%s, %s, %s, %s, %s, %s)''',
+                          (randuser, '1', 2, 0, str(datetime.datetime.now()), '2000-1-1'))
                 my_account_list += ('tai khoan: ' + randuser +
-                                    '\n' + 'mat khau: ' + '1' + '\n' + '-' * 40 + '\n')
+                                    '\n' + 'mat khau: ' + '1' + '\n' + '-' * 40 + '\n')  # add account to string
                 db.commit()
             except:
                 db.rollback()
@@ -65,11 +69,12 @@ def swimmer_creation(number_of_swimmer):
     f = open('swimmer.txt', 'w')
     temp = '-' * 40 + '\n' + my_account_list
     encoded = base64.b64encode(temp.encode())
-    f.write(str(encoded.decode()))
+    f.write(str(encoded.decode()))  # encode before store in a text file
     return jsonify({'result': {'status': 'success'}})
 
 
 def delete_swimmer(username):
+    """just delete a swimmer by his/her username"""
     db, c = connector.connection()
     try:
         c.execute('''DELETE FROM user
@@ -78,6 +83,7 @@ def delete_swimmer(username):
     except:
         db.rollback()
         return jsonify({'result': {'status': 'fail'}})
+    return jsonify({'result': {'status': 'success'}})
 
 
 def login(data):
@@ -89,7 +95,9 @@ def login(data):
                  WHERE username = %s''', obj_data.user.username)
     my_data = c.fetchall()
     if my_data:
-        if my_data[0][1] == obj_data.user.password:
+        # check hashed is valid for login
+        hashed_pw = bcrypt.hashpw(obj_data.user.password.encode(), my_data[0][1].encode())
+        if my_data[0][1].encode() == hashed_pw:
             return jsonify({'result': {'status': 'success', 'id': my_data[0][2], 'role_id': my_data[0][3]}})
     return jsonify({'result': {'status': 'fail'}})
 
@@ -118,19 +126,19 @@ def get_info(username):
 
 
 def change_password(username, data):
-    """recive a json with username, password and the new one"""
+    """recive a json password and new password"""
     db, c = connector.connection()
     obj_data = json2obj(dumps(data))
     c.execute('''SELECT password
                  FROM user
                  WHERE username = %s''', username)
     my_password = c.fetchall()  # myPassword[0][0] is password
-    if my_password[0][0] == obj_data.user.password and my_password[0][0] == obj_data.user.new_password:
-        return jsonify({'status': 'fail', 'notification': 'new password must not same at the old one'})
-    if my_password[0][0] == obj_data.user.password and my_password[0][0] != obj_data.user.new_password:
+    hashed_pw = bcrypt.hashpw(
+        obj_data.user.password.encode(), my_password[0][0].encode())
+    if my_password[0][0].encode() == hashed_pw:
         try:
             c.execute('UPDATE user SET password = %s WHERE username = %s',
-                      (obj_data.user.new_password, username))
+                      (bcrypt.hashpw(obj_data.user.new_password.encode(), bcrypt.gensalt()), username))
             db.commit()
             return jsonify({'result': {'status': 'success'}})
         except:

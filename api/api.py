@@ -73,7 +73,6 @@ def __root__():
     return '<h1>Nắm bắt vận mệnh, khai phá thiên cơ</h1>'
 
 
-
 # running web app in local machine
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
