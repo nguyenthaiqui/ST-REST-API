@@ -113,16 +113,10 @@ def get_info(username):
     if not value:
         return jsonify({'result': {'status': 'fail', 'notification': 'an error occurred'}})
     # this is key of json
-    key_value_of_swimmer = ['id', 'role_id', 'first_name', 'last_name', 'gender', 'dob', 'address',
-                            'phone', 'email', 'height', 'weight', 'parent_name', 'parent_phone']
-    key_value_of_coach = ['id', 'role_id', 'first_name', 'last_name', 'gender',
-                          'dob', 'address', 'phone', 'email']
-    # store data in json with key is field name
-    if value[0][0] == 1:  # value[0][0] is role_id
-        # jsonify a key to a value
-        return jsonify({"coach": dict(zip(key_value_of_coach, value[0]))})
-    else:
-        return jsonify({"swimmer": dict(zip(key_value_of_swimmer, value[0]))})
+    key_value = ['id', 'role_id', 'first_name', 'last_name', 'gender', 'dob', 'address',
+                 'phone', 'email', 'height', 'weight', 'parent_name', 'parent_phone']
+    # jsonify a key to a value
+    return jsonify({"user": dict(zip(key_value, value[0]))})
 
 
 def change_password(username, data):
