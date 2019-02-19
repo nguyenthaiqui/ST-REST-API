@@ -105,7 +105,7 @@ def login(data):
 def get_info(username):
     """return all information of a username"""
     db, c = connector.connection()
-    c.execute('''SELECT role_id, first_name, last_name, gender, dob, address,
+    c.execute('''SELECT id, role_id, first_name, last_name, gender, dob, address,
                         phone, email, height, weight, parent_name, parent_phone
                  FROM user
                  WHERE username = %s''', username)
@@ -113,9 +113,9 @@ def get_info(username):
     if not value:
         return jsonify({'result': {'status': 'fail', 'notification': 'an error occurred'}})
     # this is key of json
-    key_value_of_swimmer = ['role_id', 'first_name', 'last_name', 'gender', 'dob', 'address',
+    key_value_of_swimmer = ['id', 'role_id', 'first_name', 'last_name', 'gender', 'dob', 'address',
                             'phone', 'email', 'height', 'weight', 'parent_name', 'parent_phone']
-    key_value_of_coach = ['role_id', 'first_name', 'last_name', 'gender',
+    key_value_of_coach = ['id', 'role_id', 'first_name', 'last_name', 'gender',
                           'dob', 'address', 'phone', 'email']
     # store data in json with key is field name
     if value[0][0] == 1:  # value[0][0] is role_id
