@@ -98,3 +98,31 @@ def addSwimmer(team_name,f):
         return jsonify({"result": "success"})
     return jsonify({"result": "fail"})
 
+def addSwimmerExit(team_name,user_id):
+    db,c = connector.connection()
+    c.execute("SELECT id FROM team WHERE name = %s",team_name)
+    myTeamID = c.fetchall()
+    if myTeamID:
+        c.execute("UPDATE `team-swimmer` SET team_id = %s WHERE user_id")
+
+def getIDSwimmer(team_name):
+    db,c = connector.connection()
+    c.execute("SELECT id FROM team WHERE name = %s ",team_name)
+    myTeamID = c.fetchall()
+    if myTeamID:
+        c.execute("SELECT user_id FROM `team-swimmer` WHERE team_id = %s",myTeamID[0][0])
+        mySwimmerID = c.fetchall()
+        if mySwimmerID:
+            columns = ['id']
+            info = [dict(zip(columns, row)) for row in mySwimmerID]
+            return jsonify({"team":info})
+    return jsonify({"result":"fail"})
+
+def delSwimmer(team_name,user_id):
+    db,c = connector.connection()
+    myTeamID = c.execute("SELECT id FROM team WHERE name = %s",team_name)
+    if myTeamID:
+        c.execute("UPDATE `team-swimmer` SET team_id = %s WHERE user_id= %s",(11,user_id))
+        db.commit()
+        return jsonify({"result":"success"})
+    return jsonify({"result":"fail"})
