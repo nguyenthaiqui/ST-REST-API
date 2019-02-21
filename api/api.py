@@ -7,6 +7,7 @@ from flask import Flask, request
 import account
 import team
 import age
+
 app = Flask(__name__)
 
 
@@ -44,11 +45,10 @@ def __get_age__():
     return age.get()
 
 
- # request is a json must have keys(name,age)
+# request is a json must have keys(name,age)
 @app.route('/team/<username>/add', methods=['POST'])
 def __add_team__(username):
     return team.add(username, request.get_json())
-
 
 @app.route('/team/<username>/view')
 def __view_team__(username):
@@ -61,7 +61,8 @@ def __edit_team__(username, team_name):
 
 @app.route('/team/<username>/<team_name>/add', methods=['POST'])
 def __add_swimmer__(username,team_name):
-    return team.addSwimmer(username,team_name,request.get_json()    )
+    f = open("swimmer.txt", "r")
+    return team.addSwimmer(team_name,f)
 
 @app.route('/team/<username>/<team_name>/delete')
 def __delete_team__(username, team_name):
