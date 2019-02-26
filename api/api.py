@@ -7,6 +7,7 @@ from flask import Flask, request
 import account
 import team
 import age
+import send_email
 
 app = Flask(__name__)
 
@@ -79,6 +80,11 @@ def __delete_team__(username, team_name):
 @app.route('/team/<username>/<team_name>/delete/<id>')
 def __delete_swimmer__(username,team_name,id):
     return team.delSwimmer(team_name,id)
+
+@app.route('/sendmail',methods=['POST'])
+def __send_email__():
+    return send_email.sendAttachment(request.get_json(),'swimmer3.txt')
+
 
 @app.route('/')
 def __root__():
