@@ -14,3 +14,9 @@ def connection():
                          charset='utf8mb4',)
     c = db.cursor()
     return db, c
+
+def getDictCursor():
+    """The cursor which fetch data to dict"""
+    db, c = connection()
+    dict_cursor = db.cursor(pymysql.cursors.DictCursor)
+    return dict_cursor

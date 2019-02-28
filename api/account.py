@@ -12,6 +12,97 @@ from random import randint
 import datetime
 import base64
 import bcrypt
+from flask_jwt_extended import create_access_token
+import constant
+
+
+def login(data):
+    db = connector.connection()
+    dict_cursor = connector.getDictCursor()
+    try:
+        dict_cursor.execute(
+            'SELECT * FROM user WHERE username = %s', data['username'])
+    except:
+        return jsonify(
+            {
+                "value": "Error",
+                "values": [],
+                "total": 1,
+                "success": False,
+                "errorMessage": "Invalid user.",
+                "message": None,
+                "created_date": str(datetime.datetime.now())
+            }
+        )
+    db_data = dict_cursor.fetchone()
+    if db_data:
+        # The next 3 lines check hashed password is valid for login
+        hashed_pw = bcrypt.hashpw(
+            data['password'].encode(), db_data['password'].encode())
+        if db_data['password'].encode() == hashed_pw:
+            # The next 4 lines is set up expires time
+            expires = datetime.timedelta(
+                seconds=constant.TOKEN_EXPIRES_TIME)
+            access_token = create_access_token(
+                identity=data['username'], expires_delta=expires)
+            return jsonify(
+                {
+                    "value": {},
+                    "values": {
+                        "token": access_token,
+                        "expiresIn": constant.TOKEN_EXPIRES_TIME,
+                        "user": {
+                            "username": db_data['username'],
+                            "role_id": db_data['role_id'],
+                            "first_name": db_data['first_name'],
+                            "last_name": db_data['last_name'],
+                            "dob": db_data['dob'],
+                            "phone": db_data['phone'],
+                            "email": db_data['email'],
+                            "address": db_data['address'],
+                            "parent_name": db_data['parent_name'],
+                            "parent_phone": db_data['parent_phone'],
+                            "gender": db_data['gender'],
+                            "is_verified": db_data['is_verified'],
+                            "age": db_data['age'],
+                            "height": db_data['height'],
+                            "weight": db_data['weight'],
+                            "avatar": db_data['avatar'],
+                            "slug": db_data['slug'],
+                            "created_at": db_data['created_at'],
+                            "updated_at": db_data['updated_at']
+                        }
+                    },
+                    "success": True,
+                    "errorMessage": "",
+                    "message": "Accepted",
+                    "created_date": str(datetime.datetime.now())
+                }
+            )
+        else:
+            return jsonify(
+                {
+                    "value": "Error",
+                    "values": [],
+                    "total": 1,
+                    "success": False,
+                    "errorMessage": "Authentication failed. Wrong password.",
+                    "message": None,
+                    "created_date": str(datetime.datetime.now())
+                }
+            )
+    else:
+        return jsonify(
+            {
+                "value": "Error",
+                "values": [],
+                "total": 1,
+                "success": False,
+                "errorMessage": "User not found.",
+                "message": None,
+                "created_date": str(datetime.datetime.now())
+            }
+        )
 
 
 def register(data):
@@ -84,22 +175,6 @@ def delete_swimmer(username):
         db.rollback()
         return jsonify({'result': {'status': 'fail'}})
     return jsonify({'result': {'status': 'success'}})
-
-
-def login(data):
-    """recive an account json and return login status"""
-    db, c = connector.connection()
-    obj_data = json2obj(dumps(data))
-    c.execute('''SELECT username, password, id, role_id
-                 FROM user
-                 WHERE username = %s''', obj_data.user.username)
-    my_data = c.fetchall()
-    if my_data:
-        # check hashed is valid for login
-        hashed_pw = bcrypt.hashpw(obj_data.user.password.encode(), my_data[0][1].encode())
-        if my_data[0][1].encode() == hashed_pw:
-            return jsonify({'result': {'status': 'success', 'id': my_data[0][2], 'role_id': my_data[0][3]}})
-    return jsonify({'result': {'status': 'fail'}})
 
 
 def get_info(username):
