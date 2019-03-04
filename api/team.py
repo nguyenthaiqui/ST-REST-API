@@ -1,8 +1,8 @@
-"""
+'''
 @author : Kabaji
 @version : 1.1
 @since : 23 Jan 2019
-"""
+'''
 import base64
 
 import connector
@@ -10,6 +10,7 @@ from flask import jsonify
 import json
 import JSONObject
 import send_email
+
 
 def add(username, data):
     """recieve json with key(name,age)
@@ -72,9 +73,9 @@ def delete(username, team_name):
         return jsonify({"result": "success"})
     return jsonify({"result": "fail"})
 
-
-def addSwimmer(team_name,f):
+def addSwimmer(team_name,data):
     db, c = connector.connection()
+    f = open("swimmer.txt", "r")
     c.execute("SELECT id FROM team WHERE name =%s", team_name)
     myTeamID = c.fetchall()
     if myTeamID:
@@ -91,38 +92,49 @@ def addSwimmer(team_name,f):
             user = result[2]
             c.execute("SELECT id FROM user WHERE username = %s", user)
             myUserID = c.fetchall()
-            if(myUserID):
-                c.execute("INSERT INTO `team-swimmer`(user_id,team_id) VALUES(%s,%s)",(myUserID[0][0],myTeamID[0][0]))
-                db.commit()
+            if (myUserID):
+                c.execute("SELECT user_id FROM `team-swimmer` WHERE user_id = %s", myUserID[0][0])
+                if not c.fetchall():
+                    c.execute("INSERT INTO `team-swimmer`(user_id,team_id) VALUES(%s,%s)", (myUserID[0][0], myTeamID[0][0]))
+                    db.commit()
             i += 1
+        send_email.sendAttachment(data,'swimmer3.txt')
         return jsonify({"result": "success"})
     return jsonify({"result": "fail"})
 
-def addSwimmerExit(team_name,user_id):
-    db,c = connector.connection()
-    c.execute("SELECT id FROM team WHERE name = %s",team_name)
+
+def addSwimmerExit(team_name, user_id):
+    db, c = connector.connection()
+    c.execute("SELECT id FROM team WHERE name = %s", team_name)
     myTeamID = c.fetchall()
     if myTeamID:
-        c.execute("UPDATE `team-swimmer` SET team_id = %s WHERE user_id")
+        c.execute("UPDATE `team-swimmer` SET team_id = %s WHERE user_id = %s",(myTeamID[0][0],user_id))
+        db.commit()
+        return jsonify({"result":"success"})
+    return jsonify({"result":"fail"})
+
 
 def getIDSwimmer(team_name):
-    db,c = connector.connection()
-    c.execute("SELECT id FROM team WHERE name = %s ",team_name)
+    db, c = connector.connection()
+    c.execute("SELECT id FROM team WHERE name = %s ", team_name)
     myTeamID = c.fetchall()
     if myTeamID:
-        c.execute("SELECT user_id FROM `team-swimmer` WHERE team_id = %s",myTeamID[0][0])
+        c.execute("SELECT user_id FROM `team-swimmer` WHERE team_id = %s", myTeamID[0][0])
         mySwimmerID = c.fetchall()
         if mySwimmerID:
             columns = ['id']
             info = [dict(zip(columns, row)) for row in mySwimmerID]
-            return jsonify({"team":info})
-    return jsonify({"result":"fail"})
+            return jsonify({"team": info})
+    return jsonify({"result": "fail"})
 
-def delSwimmer(team_name,user_id):
-    db,c = connector.connection()
-    myTeamID = c.execute("SELECT id FROM team WHERE name = %s",team_name)
+
+def delSwimmer(team_name, user_id):
+    db, c = connector.connection()
+    c.execute("SELECT id FROM team where name = %s","No team")
+    myIDNoTeam = c.fetchall()
+    myTeamID = c.execute("SELECT id FROM team WHERE name = %s", team_name)
     if myTeamID:
-        c.execute("UPDATE `team-swimmer` SET team_id = %s WHERE user_id= %s",(11,user_id))
+        c.execute("UPDATE `team-swimmer` SET team_id = %s WHERE user_id= %s", (myIDNoTeam[0][0], user_id))
         db.commit()
-        return jsonify({"result":"success"})
-    return jsonify({"result":"fail"})
+        return jsonify({"result": "success"})
+    return jsonify({"result": "fail"})
