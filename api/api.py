@@ -9,6 +9,8 @@ import team
 import age
 import send_email
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
+import datetime
+from authentication import check_user
 
 app = Flask(__name__)
 
@@ -18,37 +20,48 @@ app.config['JWT_SECRET_KEY'] = 'doan-xem'
 jwt = JWTManager(app)
 
 
-@app.route('/api/public/Login', methods=['POST'])
+@app.route('/api/public/login', methods=['POST'])
 def __signin__():
-    if not request.is_json:
-        return jsonify({"msg": "Missing JSON in request"}), 400
     return account.login(request.get_json())
 
 
-@app.route('/signup', methods=['POST'])
+@app.route('/api/public/register', methods=['POST'])
 def __signup__():
     return account.register(request.get_json())
 
 
-@app.route('/createswimmer/<number>')
+@app.route('/api/<username>/createswimmer/<number>')
 @jwt_required
-def __swimmer_creation__(number):
-    current_user = get_jwt_identity()
-    return account.swimmer_creation(number)
+def __swimmer_creation__(number, username):
+    check_user(get_jwt_identity(), username)
+    return account.swimmer_creation(number, username)
 
 
-@app.route('/profile/<username>/view')
+@app.route('/api/<username>/deleteswimmeraccount/<swimmer_username>')
+@jwt_required
+def __delete_swimmer_account__(username, swimmer_username):
+    check_user(get_jwt_identity(), username)
+    return account.delete_swimmer(username, swimmer_username)
+
+
+@app.route('/api/profile/<username>/view')
+@jwt_required
 def __view_profile__(username):
+    check_user(get_jwt_identity(), username)
     return account.get_info(username)
 
 
-@app.route('/profile/<username>/edit', methods=['POST'])
+@app.route('/api/profile/<username>/edit', methods=['POST'])
+@jwt_required
 def __edit_profile__(username):
+    check_user(get_jwt_identity(), username)
     return account.edit_info(username, request.get_json())
 
 
-@app.route('/profile/<username>/changepassword', methods=['POST'])
+@app.route('/api/profile/<username>/changepassword', methods=['POST'])
+@jwt_required
 def __change_password__(username):
+    check_user(get_jwt_identity(), username)
     return account.change_password(username, request.get_json())
 
 
