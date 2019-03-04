@@ -7,11 +7,9 @@ from flask import Flask, jsonify, request
 import account
 import team
 import age
-import send_email
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 
 app = Flask(__name__)
-
 
 # Setup the Flask-JWT-Extended extension
 app.config['JWT_SECRET_KEY'] = 'doan-xem'
@@ -74,9 +72,8 @@ def __edit_team__(username, team_name):
 
 
 @app.route('/team/<username>/<team_name>/add', methods=['POST'])
-def __add_swimmer__(team_name):
-    f = open("swimmer.txt", "r")
-    return team.addSwimmer(team_name, f)
+def __add_swimmer__(username, team_name):
+    return team.addSwimmer(team_name, request.get_json())
 
 
 @app.route('/team/<username>/<team_name>/view')
@@ -86,7 +83,12 @@ def __get_swimmer__(username, team_name):
 
 @app.route('/team/noteam')
 def __get_swimmer_no_team__():
-    return team.getIDSwimmer("noteam")
+    return team.getIDSwimmer("No team")
+
+
+@app.route('/team/<username>/<team_name>/add/<id>')
+def __add_swimmer_exit__(username, team_name, id):
+    return team.addSwimmerExit(team_name, id)
 
 
 @app.route('/team/<username>/<team_name>/delete')
@@ -99,15 +101,9 @@ def __delete_swimmer__(username, team_name, id):
     return team.delSwimmer(team_name, id)
 
 
-@app.route('/sendmail', methods=['POST'])
-def __send_email__():
-    return send_email.sendAttachment(request.get_json(), 'swimmer3.txt')
-
-
 @app.route('/')
 def __root__():
     return '<h1>Nắm bắt vận mệnh, khai phá thiên cơ</h1>'
-
 
 
 # running web app in local machine
