@@ -19,7 +19,7 @@ def create_lesson(data):
                                              repetition, age, description, create_at)
                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s)''',
                      (obj_data.lesson.name, str(datetime.datetime.now()), obj_data.lesson.style_id,
-                     obj_data.lesson.distance_id, 1, obj_data.lesson.age,
+                     obj_data.lesson.distance_id, 1, obj_data.lesson.team_name,
                      obj_data.lesson.description, str(datetime.datetime.now())))
         db.commit()
     except:

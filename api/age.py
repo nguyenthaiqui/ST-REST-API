@@ -1,3 +1,10 @@
+'''
+@author: Kabaji
+@email: nguyenthaiqui233@gmail.com
+@version: 1.0
+@since: Jan 27, 2019
+'''
+
 import connector
 from flask import jsonify
 
