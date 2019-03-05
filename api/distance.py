@@ -6,16 +6,14 @@
 '''
 import connector
 from flask import jsonify
-from JSONObject import json2obj  # json2obj recive a string
-from json import dumps
 
 
-def add(data):
-	db, c = connector.connection()
-    obj_data = json2obj(dumps(data))
-    
-
-
-def delete(data):
-	db, c = connector.connection()
-    obj_data = json2obj(dumps(data))
+def get():
+   db, c = connector.connection()
+   """get all databases from table age and convert to json"""
+   c.execute("SELECT * FROM distance")
+   myDistance = c.fetchall()
+   columns = ['id','swim_distance']
+   #columns = [column[0] for column in c.description]        #get keys in db
+   info =[dict(zip(columns, row)) for row in myDistance]        #create zip with key & value => convert dict
+   return jsonify(info)

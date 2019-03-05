@@ -73,7 +73,8 @@ def delete(username, team_name):
         return jsonify({"result": "success"})
     return jsonify({"result": "fail"})
 
-def addSwimmer(team_name,data):
+
+def addSwimmer(team_name, data):
     db, c = connector.connection()
     f = open("swimmer.txt", "r")
     c.execute("SELECT id FROM team WHERE name =%s", team_name)
@@ -95,10 +96,11 @@ def addSwimmer(team_name,data):
             if (myUserID):
                 c.execute("SELECT user_id FROM `team-swimmer` WHERE user_id = %s", myUserID[0][0])
                 if not c.fetchall():
-                    c.execute("INSERT INTO `team-swimmer`(user_id,team_id) VALUES(%s,%s)", (myUserID[0][0], myTeamID[0][0]))
+                    c.execute("INSERT INTO `team-swimmer`(user_id,team_id) VALUES(%s,%s)",
+                              (myUserID[0][0], myTeamID[0][0]))
                     db.commit()
             i += 1
-        send_email.sendAttachment(data,'swimmer3.txt')
+        send_email.sendAttachment(data, 'swimmer3.txt')
         return jsonify({"result": "success"})
     return jsonify({"result": "fail"})
 
@@ -108,10 +110,10 @@ def addSwimmerExit(team_name, user_id):
     c.execute("SELECT id FROM team WHERE name = %s", team_name)
     myTeamID = c.fetchall()
     if myTeamID:
-        c.execute("UPDATE `team-swimmer` SET team_id = %s WHERE user_id = %s",(myTeamID[0][0],user_id))
+        c.execute("UPDATE `team-swimmer` SET team_id = %s WHERE user_id = %s", (myTeamID[0][0], user_id))
         db.commit()
-        return jsonify({"result":"success"})
-    return jsonify({"result":"fail"})
+        return jsonify({"result": "success"})
+    return jsonify({"result": "fail"})
 
 
 def getIDSwimmer(team_name):
@@ -130,7 +132,7 @@ def getIDSwimmer(team_name):
 
 def delSwimmer(team_name, user_id):
     db, c = connector.connection()
-    c.execute("SELECT id FROM team where name = %s","No team")
+    c.execute("SELECT id FROM team where name = %s", "No team")
     myIDNoTeam = c.fetchall()
     myTeamID = c.execute("SELECT id FROM team WHERE name = %s", team_name)
     if myTeamID:

@@ -1,3 +1,10 @@
+'''
+@author: Kabaji
+@email: nguyenthaiqui233@gmail.com
+@version: 1.0
+@since: Feb 26, 2019
+'''
+
 import smtplib
 import decode_file
 from flask import jsonify
@@ -11,8 +18,8 @@ def sendAttachment(data,filename):
     decode_file.decodeText('swimmer.txt', filename)
 
     """information"""
-    email_user = 'wenmeah2@gmail.com'
-    email_password = 'tinkendo'
+    email_user = 'swimtracker001@gmail.com'
+    email_password = 'dinhluu123'
     subject = 'Danh sách tài khoản của đội '
 
     msg = MIMEMultipart()

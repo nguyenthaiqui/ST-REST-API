@@ -63,54 +63,70 @@ def __change_password__(username):
     return account.change_password(username, request.get_json())
 
 
-@app.route('/age', methods=['GET'])
+@app.route('/public/age', methods=['GET'])
 def __get_age__():
     return age.get()
 
 
 # request is a json must have keys(name,age)
 @app.route('/team/<username>/add', methods=['POST'])
+@jwt_required
 def __add_team__(username):
+    check_user(get_jwt_identity(), username)
     return team.add(username, request.get_json())
 
 
 @app.route('/team/<username>/view')
+@jwt_required
 def __view_team__(username):
+    check_user(get_jwt_identity(),username)
     return team.view(username)
 
 
 @app.route('/team/<username>/<team_name>/edit', methods=['POST'])
+@jwt_required
 def __edit_team__(username, team_name):
+    check_user(get_jwt_identity(),username)
     return team.edit(username, team_name, request.get_json())
 
 
 @app.route('/team/<username>/<team_name>/add', methods=['POST'])
+@jwt_required
 def __add_swimmer__(username, team_name):
+    check_user(get_jwt_identity(),username)
     return team.addSwimmer(team_name, request.get_json())
 
 
 @app.route('/team/<username>/<team_name>/view')
+@jwt_required
 def __get_swimmer__(username, team_name):
+    check_user(get_jwt_identity(),username)
     return team.getIDSwimmer(team_name)
 
 
-@app.route('/team/noteam')
+@app.route('/public/team/noteam')
 def __get_swimmer_no_team__():
     return team.getIDSwimmer("No team")
 
 
 @app.route('/team/<username>/<team_name>/add/<id>')
+@jwt_required
 def __add_swimmer_exit__(username, team_name, id):
+    check_user(get_jwt_identity(),username)
     return team.addSwimmerExit(team_name, id)
 
 
 @app.route('/team/<username>/<team_name>/delete')
+@jwt_required
 def __delete_team__(username, team_name):
+    check_user(get_jwt_identity(),username)
     return team.delete(username, team_name)
 
 
 @app.route('/team/<username>/<team_name>/delete/<id>')
+@jwt_required
 def __delete_swimmer__(username, team_name, id):
+    check_user(get_jwt_identity(),username)
     return team.delSwimmer(team_name, id)
 
 
