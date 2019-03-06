@@ -8,12 +8,14 @@ import connector
 from flask import jsonify
 from JSONObject import json2obj  # json2obj recive a string
 from json import dumps
-from random import randint
+import random
 import datetime
 import base64
 import bcrypt
 from flask_jwt_extended import create_access_token
 import constant
+from send_email import sendText
+import string
 
 
 def login(js_data):
@@ -40,35 +42,16 @@ def login(js_data):
 		if db_data['password'].encode() == hashed_pw:
 			# The next 4 lines is set up expires time
 			expires = datetime.timedelta(
-				seconds=constant.TOKEN_EXPIRES_TIME)
+				seconds=constant.ACCESS_TOKEN_EXPIRES_TIME)
+			# the identity is username
 			access_token = create_access_token(
-				identity=js_data['username'], expires_delta=expires)
+				identity = js_data['username'], expires_delta = expires)
 			return jsonify(
 				{
 					"values": {
 						"token": access_token,
-						"expiresIn": constant.TOKEN_EXPIRES_TIME,
-						"user": {
-							"username": db_data['username'],
-							"role_id": db_data['role_id'],
-							"first_name": db_data['first_name'],
-							"last_name": db_data['last_name'],
-							"dob": db_data['dob'],
-							"phone": db_data['phone'],
-							"email": db_data['email'],
-							"address": db_data['address'],
-							"parent_name": db_data['parent_name'],
-							"parent_phone": db_data['parent_phone'],
-							"gender": db_data['gender'],
-							"is_verified": db_data['is_verified'],
-							"age": db_data['age'],
-							"height": db_data['height'],
-							"weight": db_data['weight'],
-							"avatar": db_data['avatar'],
-							"slug": db_data['slug'],
-							"created_at": db_data['created_at'],
-							"updated_at": db_data['updated_at']
-						}
+						"expiresIn": constant.ACCESS_TOKEN_EXPIRES_TIME,
+						"username": js_data['username']
 					},
 					"success": True,
 					"errorMessage": None,
@@ -110,13 +93,13 @@ def register(js_data):
 			js_data['password'].encode(), bcrypt.gensalt())  # hash password by bcrypt
 		try:
 			c.execute('''INSERT INTO 
-						user (username, password, first_name, last_name, dob, gender,
-						address, phone, email, role_id, is_verified, created_at)
-						VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''',
-					  (js_data['username'], hashed_pw, js_data['first_name'],
-					   js_data['last_name'], js_data['dob'], js_data['gender'],
-					   js_data['address'], js_data['phone'], js_data['email'],
-					   1, 0, str(datetime.datetime.now())))
+				user (username, password, first_name, last_name, dob, gender,
+				address, phone, email, role_id, is_verified, created_at)
+				VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''',
+				(js_data['username'], hashed_pw, js_data['first_name'],
+				js_data['last_name'], js_data['dob'], js_data['gender'],
+				js_data['address'], js_data['phone'], js_data['email'],
+				1, 0, str(datetime.datetime.now())))
 			db.commit()
 		except:
 			db.rollback()
@@ -153,7 +136,6 @@ def register(js_data):
 	)
 
 
-
 def swimmer_creation(number_of_swimmer, username):  # GET methods
 	"""receive number of swimmer need to create"""
 	db, c = connector.connection()
@@ -161,7 +143,7 @@ def swimmer_creation(number_of_swimmer, username):  # GET methods
 	my_account_list = ""  # this string store account has been created
 	i = 0
 	while i < int(number_of_swimmer):
-		rand_num = str(randint(1, 9999)).zfill(4)  # format 55 to 0055
+		rand_num = str(random.randint(1, 9999)).zfill(4)  # format 55 to 0055
 		this_year = str(datetime.datetime.now().year)  # get this year
 		randuser = 'st' + this_year + '_' + rand_num  # format st<this year>_<random number>
 		dict_cursor.execute(
@@ -170,10 +152,8 @@ def swimmer_creation(number_of_swimmer, username):  # GET methods
 		if not my_username:  # check duplication
 			try:
 				c.execute('''INSERT INTO user (username, password, 
-							role_id, is_verified, created_at, dob)
-							VALUES (%s, %s, %s, %s, %s, %s)''',
-							(randuser, '1', 2, 0,
-							str(datetime.datetime.now()), '2000-1-1'))
+					role_id, is_verified, created_at, dob) VALUES (%s, %s, %s, %s, %s, %s)''',
+					(randuser, '1', 2, 0, str(datetime.datetime.now()), '2000-1-1'))
 				# add account to string
 				my_account_list += ('tai khoan: ' + randuser +
 									'\n' + 'mat khau: ' + '1' + '\n' + '-' * 40 + '\n')
@@ -266,7 +246,8 @@ def get_info(username):
 
 
 def change_password(username, js_data):
-	"""recive a json password and new password"""
+	"""	username is GET method
+		js_data are password, new_password"""
 	db, c = connector.connection()
 	dict_cursor = connector.getDictCursor()
 	dict_cursor.execute('SELECT password FROM user WHERE username = %s', username)
@@ -276,7 +257,8 @@ def change_password(username, js_data):
 	if my_password['password'].encode() == hashed_pw:
 		try:
 			c.execute('UPDATE user SET password = %s WHERE username = %s',
-					  (bcrypt.hashpw(js_data['new_password'].encode(), bcrypt.gensalt()), username))
+				(bcrypt.hashpw(js_data['new_password'].encode(),
+				bcrypt.gensalt()), username))
 			db.commit()
 			return jsonify(
 				{
@@ -290,34 +272,123 @@ def change_password(username, js_data):
 		except:
 			db.rollback()
 	return jsonify(
-				{
-					"values": "Error",
-					"success": False,
-					"errorMessage": "Something went wrong.",
-					"message": None,
-					"created_date": str(datetime.datetime.now())
-				}
-			)
+		{
+			"values": "Error",
+			"success": False,
+			"errorMessage": "Something went wrong.",
+			"message": None,
+			"created_date": str(datetime.datetime.now())
+		}
+	)
 
 
 def edit_info(username, js_data):
-	"""return success if edit success, else return fail"""
+	'''	username is GET method, 
+		js_data are 
+		first_name, last_name, gender, dob, weight,
+		height, address, phone, email, parent_name, parent_phone
+		protected'''
 	db, c = connector.connection()
 	dict_cursor = connector.getDictCursor()
 	try:
 		c.execute('''UPDATE user
-					SET first_name = %s, last_name = %s, gender = %s, dob = %s, weight = %s,
-						 height = %s, address = %s, phone = %s, email = %s, parent_name = %s,
-						 parent_phone = %s
-					WHERE username = %s''',
-					(js_data['first_name'], js_data['last_name'], js_data['gender'],
-					js_data['dob'], js_data['weight'], js_data['height'],
-					js_data['address'], js_data['phone'], js_data['email'],
-					js_data['parent_name'], js_data['parent_phone'], username))
+			SET first_name = %s, last_name = %s, gender = %s, dob = %s, weight = %s,
+			height = %s, address = %s, phone = %s, email = %s, parent_name = %s,
+			parent_phone = %s
+			WHERE username = %s''',
+			(js_data['first_name'], js_data['last_name'], js_data['gender'],
+			js_data['dob'], js_data['weight'], js_data['height'],
+			js_data['address'], js_data['phone'], js_data['email'],
+			js_data['parent_name'], js_data['parent_phone'], username))
 		db.commit()
 		return jsonify(
 			{
 				"values": "Profile of " + username + " has been changed.",
+				"success": True,
+				"errorMessage": None,
+				"message": "Accepted.",
+				"created_date": str(datetime.datetime.now())
+			}
+		)
+	except:
+		db.rollback()
+	return jsonify(
+		{
+			"values": "Error",
+			"success": False,
+			"errorMessage": "Something went wrong.",
+			"message": None,
+			"created_date": str(datetime.datetime.now())
+		}
+	)
+
+
+def send_email_to_change_password(email):
+	'''	data is email'''
+	db, c = connector.connection()
+	dict_cursor = connector.getDictCursor()
+	try:
+		dict_cursor.execute('SELECT username, password, last_name FROM user WHERE email = %s', 
+			email)
+	except:
+		return jsonify(
+			{
+				"values": "Error",
+				"success": False,
+				"errorMessage": "Something went wrong.",
+				"message": None,
+				"created_date": str(datetime.datetime.now())
+			}
+		)
+	data = dict_cursor.fetchone()
+	# reset password token generate
+	if data:
+		expires = datetime.timedelta(
+					seconds = constant.RESET_PASSWORD_TOKEN_EXPIRES_TIME)
+		# a random string with 6 digits
+		identity = ''.join(random.choice(string.ascii_lowercase) for i in range(6))
+		reset_password_token = create_access_token(
+					identity = identity, expires_delta = expires)
+		# calling send email function
+		sendText(email, data['last_name'], reset_password_token)
+		return jsonify(
+			{
+				"values": {
+					"token": reset_password_token,
+					"expiresIn": constant.RESET_PASSWORD_TOKEN_EXPIRES_TIME,
+					"username": data['username'],
+					"identity": identity
+				},
+				"success": True,
+				"errorMessage": None,
+				"message": "Reset PIN was sent to " + email + ".",
+				"created_date": str(datetime.datetime.now())
+			}
+		)
+	else:
+		return jsonify(
+			{
+				"values": "Error",
+				"success": False,
+				"errorMessage": "There is no email like this.",
+				"message": None,
+				"created_date": str(datetime.datetime.now())
+			}
+		)
+
+
+def forgot_password(js_data):
+	'''	json must have username, new_password'''
+	db, c = connector.connection()
+	# hash new password
+	hashed_pw = bcrypt.hashpw(js_data['new_password'].encode(), bcrypt.gensalt())
+	try:
+		c.execute('UPDATE user SET password = %s WHERE username = %s', 
+			(hashed_pw, js_data['username']))
+		db.commit()
+		return jsonify(
+			{
+				"values": "Update password for user " + js_data['username'],
 				"success": True,
 				"errorMessage": None,
 				"message": "Accepted.",
