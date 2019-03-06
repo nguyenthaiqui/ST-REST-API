@@ -19,16 +19,33 @@ jwt = JWTManager(app)
 
 
 @app.route('/api/public/login', methods=['POST'])
+# log in
 def __signin__():
     return account.login(request.get_json())
 
 
 @app.route('/api/public/register', methods=['POST'])
+# register new account
 def __signup__():
     return account.register(request.get_json())
 
 
+@app.route('/api/public/forgotpassword/<email>/sendpin')
+# send PIN to email for forgot password
+def __send_PIN__(email):
+    return account.send_email_to_change_password(email)
+
+
+@app.route('/api/forgotpassword/<identity>/newpassword', methods=['POST'])
+# forgot password, identity will be generated in __send_PIN__ function
+@jwt_required
+def __forgot_password__(identity):
+    check_user(get_jwt_identity(), identity)
+    return account.forgot_password(request.get_json())
+
+
 @app.route('/api/<username>/createswimmer/<number>')
+# auto create swimmer
 @jwt_required
 def __swimmer_creation__(number, username):
     check_user(get_jwt_identity(), username)
@@ -36,6 +53,7 @@ def __swimmer_creation__(number, username):
 
 
 @app.route('/api/<username>/deleteswimmeraccount/<swimmer_username>')
+# delete a swimmer account, this function have some problems
 @jwt_required
 def __delete_swimmer_account__(username, swimmer_username):
     check_user(get_jwt_identity(), username)
@@ -43,6 +61,7 @@ def __delete_swimmer_account__(username, swimmer_username):
 
 
 @app.route('/api/profile/<username>/view')
+# get all profile of user
 @jwt_required
 def __view_profile__(username):
     check_user(get_jwt_identity(), username)
@@ -50,6 +69,7 @@ def __view_profile__(username):
 
 
 @app.route('/api/profile/<username>/edit', methods=['POST'])
+# edit profile of user
 @jwt_required
 def __edit_profile__(username):
     check_user(get_jwt_identity(), username)
@@ -57,6 +77,7 @@ def __edit_profile__(username):
 
 
 @app.route('/api/profile/<username>/changepassword', methods=['POST'])
+# change password of an account
 @jwt_required
 def __change_password__(username):
     check_user(get_jwt_identity(), username)
@@ -79,28 +100,28 @@ def __add_team__(username):
 @app.route('/team/<username>/view')
 @jwt_required
 def __view_team__(username):
-    check_user(get_jwt_identity(),username)
+    check_user(get_jwt_identity(), username)
     return team.view(username)
 
 
 @app.route('/team/<username>/<team_name>/edit', methods=['POST'])
 @jwt_required
 def __edit_team__(username, team_name):
-    check_user(get_jwt_identity(),username)
+    check_user(get_jwt_identity(), username)
     return team.edit(username, team_name, request.get_json())
 
 
 @app.route('/team/<username>/<team_name>/add', methods=['POST'])
 @jwt_required
 def __add_swimmer__(username, team_name):
-    check_user(get_jwt_identity(),username)
+    check_user(get_jwt_identity(), username)
     return team.addSwimmer(team_name, request.get_json())
 
 
 @app.route('/team/<username>/<team_name>/view')
 @jwt_required
 def __get_swimmer__(username, team_name):
-    check_user(get_jwt_identity(),username)
+    check_user(get_jwt_identity(), username)
     return team.getIDSwimmer(team_name)
 
 
@@ -112,21 +133,21 @@ def __get_swimmer_no_team__():
 @app.route('/team/<username>/<team_name>/add/<id>')
 @jwt_required
 def __add_swimmer_exit__(username, team_name, id):
-    check_user(get_jwt_identity(),username)
+    check_user(get_jwt_identity(), username)
     return team.addSwimmerExit(team_name, id)
 
 
 @app.route('/team/<username>/<team_name>/delete')
 @jwt_required
 def __delete_team__(username, team_name):
-    check_user(get_jwt_identity(),username)
+    check_user(get_jwt_identity(), username)
     return team.delete(username, team_name)
 
 
 @app.route('/team/<username>/<team_name>/delete/<id>')
 @jwt_required
 def __delete_swimmer__(username, team_name, id):
-    check_user(get_jwt_identity(),username)
+    check_user(get_jwt_identity(), username)
     return team.delSwimmer(team_name, id)
 
 

@@ -7,6 +7,7 @@
 import datetime
 from flask import jsonify
 
+
 def check_user(current_user, username):
     if current_user != username:
         return jsonify(
