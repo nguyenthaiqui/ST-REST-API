@@ -75,6 +75,7 @@ def delete(username, team_name):
 
 
 def addSwimmer(team_name, data):
+    """Add swimmer account generated into DB"""
     db, c = connector.connection()
     f = open("swimmer.txt", "r")
     c.execute("SELECT id FROM team WHERE name =%s", team_name)
@@ -116,18 +117,29 @@ def addSwimmerExit(team_name, user_id):
     return jsonify({"result": "fail"})
 
 
-def getIDSwimmer(team_name):
+def getSwimmerInfo(team_name):
     db, c = connector.connection()
+    dict_cursor = connector.getDictCursor()
     c.execute("SELECT id FROM team WHERE name = %s ", team_name)
     myTeamID = c.fetchall()
     if myTeamID:
         c.execute("SELECT user_id FROM `team-swimmer` WHERE team_id = %s", myTeamID[0][0])
         mySwimmerID = c.fetchall()
-        if mySwimmerID:
-            columns = ['id']
-            info = [dict(zip(columns, row)) for row in mySwimmerID]
-            return jsonify({"team": info})
-    return jsonify({"result": "fail"})
+        result = []
+        columns = ['id','username','dob' ,'first_name', 'last_name']
+        for row in mySwimmerID:
+            dict_cursor.execute("SELECT username,dob,first_name,last_name FROM `user` WHERE id = %s", row[0])
+            mySwimmerInfo = dict_cursor.fetchone()
+            listRow = [row[0],mySwimmerInfo['username'],mySwimmerInfo['dob'], mySwimmerInfo['first_name'], mySwimmerInfo['last_name']]
+            info = dict(zip(columns, listRow))
+            result.append(info)
+        return jsonify({"team": result})
+    return jsonify(
+        {
+            "result":"fail",
+            "message":"unknown team"
+        }
+    )
 
 
 def delSwimmer(team_name, user_id):

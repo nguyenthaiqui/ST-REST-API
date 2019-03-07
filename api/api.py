@@ -5,6 +5,9 @@
 '''
 from flask import Flask, jsonify, request
 import account
+import distance
+import record
+import style
 import team
 import age
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
@@ -120,14 +123,14 @@ def __add_swimmer__(username, team_name):
 
 @app.route('/team/<username>/<team_name>/view')
 @jwt_required
-def __get_swimmer__(username, team_name):
+def __get_swimmer_info__(username, team_name):
     check_user(get_jwt_identity(), username)
-    return team.getIDSwimmer(team_name)
+    return team.getSwimmerInfo(team_name)
 
 
 @app.route('/public/team/noteam')
 def __get_swimmer_no_team__():
-    return team.getIDSwimmer("No team")
+    return team.getSwimmerInfo("No team")
 
 
 @app.route('/team/<username>/<team_name>/add/<id>')
@@ -150,6 +153,20 @@ def __delete_swimmer__(username, team_name, id):
     check_user(get_jwt_identity(), username)
     return team.delSwimmer(team_name, id)
 
+
+@app.route('/public/distance')
+def __get_distance__():
+    return distance.get()
+
+@app.route('/public/style')
+def __get_style__():
+    return style.get()
+
+@app.route('/team/<username>/<team_name>/record/add',methods=['POST'])
+@jwt_required
+def __add_record__(username,team_name):
+    check_user(get_jwt_identity(),username)
+    return record.addRecord(request.get_json())
 
 @app.route('/')
 def __root__():
