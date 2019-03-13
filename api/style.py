@@ -8,7 +8,7 @@ import connector
 from flask import jsonify
 
 
-def get():
+def getStyle():
    db, c = connector.connection()
    """get all databases from table age and convert to json"""
    c.execute("SELECT * FROM style")

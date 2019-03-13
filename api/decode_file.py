@@ -1,3 +1,10 @@
+'''
+@author: Kabaji
+@email: nguyenthaiqui233@gmail.com
+@version: 1.0
+@since: Feb 27, 2019
+'''
+
 import base64
 
 def decodeText(filename1,filename2):
