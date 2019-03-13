@@ -156,11 +156,11 @@ def __delete_swimmer__(username, team_name, id):
 
 @app.route('/public/distance')
 def __get_distance__():
-    return distance.get()
+    return distance.getDistance()
 
 @app.route('/public/style')
 def __get_style__():
-    return style.get()
+    return style.getStyle()
 
 @app.route('/team/<username>/<team_name>/record/add',methods=['POST'])
 @jwt_required

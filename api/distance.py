@@ -1,6 +1,6 @@
 '''
-@author: Evan
-@email: lenguyenhoangvan18@gmail.com
+@author: Kabaji
+@email: nguyenthaiqui233@gmail.com
 @version: 1.0
 @since: Feb 20, 2019
 '''
@@ -8,7 +8,7 @@ import connector
 from flask import jsonify
 
 
-def get():
+def getDistance():
    db, c = connector.connection()
    """get all databases from table age and convert to json"""
    c.execute("SELECT * FROM distance")
