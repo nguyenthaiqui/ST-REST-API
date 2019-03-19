@@ -26,5 +26,7 @@ def addRecord(js_data):
                   "VALUES(%s,%s,%s,%s,%s,%s,%s)",values)
         return jsonify({"result":"success"})
     else:
-        return jsonify({"result":"unknown username"})
+        return jsonify({"result":"fail","message":"Unknow user"})
     return  jsonify({"result":"fail"})
+
+

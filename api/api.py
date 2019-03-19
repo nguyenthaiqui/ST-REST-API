@@ -107,11 +107,11 @@ def __view_team__(username):
     return team.view(username)
 
 
-@app.route('/team/<username>/<team_name>/edit', methods=['POST'])
+@app.route('/team/<username>/<team_id>/edit', methods=['POST'])
 @jwt_required
-def __edit_team__(username, team_name):
+def __edit_team__(username, team_id):
     check_user(get_jwt_identity(), username)
-    return team.edit(username, team_name, request.get_json())
+    return team.edit(username, team_id, request.get_json())
 
 
 @app.route('/team/<username>/<team_name>/add', methods=['POST'])
@@ -121,37 +121,37 @@ def __add_swimmer__(username, team_name):
     return team.addSwimmer(team_name, request.get_json())
 
 
-@app.route('/team/<username>/<team_name>/view')
+@app.route('/team/<username>/<team_id>/view')
 @jwt_required
-def __get_swimmer_info__(username, team_name):
+def __get_swimmer_info__(username, team_id):
     check_user(get_jwt_identity(), username)
-    return team.getSwimmerInfo(team_name)
+    return team.getSwimmerInfo(team_id)
 
 
 @app.route('/public/team/noteam')
 def __get_swimmer_no_team__():
-    return team.getSwimmerInfo("No team")
+    return team.getSwimmerInfoNoTeam("No team")
 
 
-@app.route('/team/<username>/<team_name>/add/<id>')
+@app.route('/team/<username>/<team_id>/add/<user_id>')
 @jwt_required
-def __add_swimmer_exit__(username, team_name, id):
+def __add_swimmer_exit__(username, team_id, user_id):
     check_user(get_jwt_identity(), username)
-    return team.addSwimmerExit(team_name, id)
+    return team.addSwimmerExit(team_id, user_id)
 
 
-@app.route('/team/<username>/<team_name>/delete')
+@app.route('/team/<username>/<team_id>/delete')
 @jwt_required
-def __delete_team__(username, team_name):
+def __delete_team__(username, team_id):
     check_user(get_jwt_identity(), username)
-    return team.delete(username, team_name)
+    return team.delete(username, team_id)
 
 
-@app.route('/team/<username>/<team_name>/delete/<id>')
+@app.route('/team/<username>/<team_id>/delete/<id>')
 @jwt_required
-def __delete_swimmer__(username, team_name, id):
+def __delete_swimmer__(username, team_id, id):
     check_user(get_jwt_identity(), username)
-    return team.delSwimmer(team_name, id)
+    return team.delSwimmer(team_id, id)
 
 
 @app.route('/public/distance')
