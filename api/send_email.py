@@ -48,9 +48,23 @@ def sendAttachment(data, filename):
 
         server.sendmail(email_user, email_send, text)
         server.quit()
-        return jsonify({"result": "success"})
+        return jsonify(
+            {
+                "values": "The list of swimmer account has sent to email : "+data['email'],
+                "success": True,
+                "errorMessage": "",
+                "message": None,
+            }
+        )
     except Exception as e:
-        return jsonify({"result": "fail", "Exception": e})
+        return jsonify(
+            {
+                "values": "Error",
+                "success": False,
+                "errorMessage": e,
+                "message": None,
+            }
+        )
 
 
 def sendText(email_send, last_name, reset_password_token):
