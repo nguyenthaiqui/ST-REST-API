@@ -25,6 +25,19 @@ def add(data,lesson_id):
 
     dict_cursos.execute("SELECT * FROM `lesson_plan` WHERE id = %s",lesson_id)
     myLesson = dict_cursos.fetchone()
+
+    c.execute("SELECT * FROM `lesson_plan` WHERE id = %s",lesson_id)
+    if not c.fetchall():
+        db.close()
+        return jsonify(
+            {
+                "values": "",
+                "success": False,
+                "errorMessage": "Invalid lesson_id",
+                "message": None
+            }
+        )
+
     c.execute("SELECT * FROM `exercise` WHERE type = %s AND lesson_id = %s",(data['type_name'],lesson_id))
     if not c.fetchall():
         c.execute("INSERT INTO `exercise` (style,distance,repetition,description,type,lesson_id) VALUES(%s,%s,%s,%s,%s,%s)",
