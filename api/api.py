@@ -174,9 +174,13 @@ def __add_record__(username,team_name):
     check_user(get_jwt_identity(),username)
     return record.addRecord(request.get_json())
 
-@app.route('/workout/<username>/<team_id>/add',methods=['POST'])
-def __add_lesson__(username,team_id):
-    return lesson.add(request.get_json(), username, team_id)
+@app.route('/workout/<username>/add',methods=['POST'])
+def __add_lesson__(username):
+    return lesson.add(request.get_json(), username)
+
+@app.route('/workout/<username>/view')
+def __view_lesson__(username):
+    return lesson.view(username,request.get_json())
 
 @app.route('/workout/<username>/<team_id>/<lesson_id>/edit',methods=['POST'])
 def __edit_lesson__(username,team_id,lesson_id):
