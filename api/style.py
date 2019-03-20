@@ -16,4 +16,5 @@ def getStyle():
    columns = ['id','swim_name']
    #columns = [column[0] for column in c.description]        #get keys in db
    info =[dict(zip(columns, row)) for row in myStyle]        #create zip with key & value => convert dict
+   db.close()
    return jsonify(info)

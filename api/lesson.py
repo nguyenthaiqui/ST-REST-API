@@ -1,49 +1,101 @@
 '''
-@author: Evan
-@email: lenguyenhoangvan18@gmail.com
+@author: Kabaji
+@email: nguyenthaiqui233@gmail.com
 @version: 1.0
-@since: Feb 21, 2019
+@since: Mar 19, 2019
 '''
 import connector
 from flask import jsonify
 import datetime
 
-
-def create_lesson(data,username,teamname):
-    db, c = connector.connection()
+def add(data, username, team_id):
+    db,c = connector.connection()
     dict_cursor = connector.getDictCursor()
 
-    dict_cursor.execute("SELECT id FROM `user` WHERE username = %s",username)
+    dict_cursor.execute("SELECT * FROM `user` WHERE username = %s",username)
     coach = dict_cursor.fetchone()
-    try:
-        c.execute('''INSERT INTO lesson_plan (name, `date`, style_id, distance_id,
-                                             repetition, age, description, create_at,coach_id)
-                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)''',
-                     (data['name'], str(datetime.datetime.now()), data['style_id'],
-                     data['distance_id'], data['repetition'], teamname,
-                     data['description'], str(datetime.datetime.now())),coach['id'])
+
+    c.execute("SELECT * FROM `lesson_plan` WHERE name = %s AND coach_id = %s AND team_id = %s",(data['name'],coach['id'],team_id))
+    myLesson = c.fetchall()
+    if not myLesson:
+        c.execute("INSERT INTO `lesson_plan` (name,date,created_at,coach_id,team_id) VALUES (%s,%s,%s,%s,%s)",
+                  (data['name'],data['date'],str(datetime.datetime.now()),coach['id'],team_id))
         db.commit()
-    except:
-        db.rollback()
-        return jsonify({'result': {'status': 'fail'}})
-    return jsonify({'result': {'status': 'success'}})
+        db.close()
+        return jsonify(
+            {
+                "values": "Lesson " + data['name'] + " has created",
+                "success": True,
+                "errorMessage": "",
+                "message": None
+            }
+        )
+    db.close()
+    return jsonify(
+        {
+            "values": "",
+            "success": False,
+            "errorMessage": "The lesson exist",
+            "message": None
+        }
+    )
 
-
-def increase_repetition(team,username):
-    db, c = connector.connection()
+def edit(data,username, team_id,lesson_id):
+    db,c = connector.connection()
     dict_cursor = connector.getDictCursor()
-    dict_cursor.execute("SELECT id FROM `user` WHERE username = %s", username)
-    coach = dict_cursor.fetchone()
-    c.execute('''SELECT repetition 
-                 FROM lesson_plan 
-                 WHERE team = %s AND coach_id = %s''')
-    my_repe = c.fetchall()
-    try:
-        c.execute('''UPDATE lesson_plan
-                     SET repetition, update_at
-                     WHERE team = %s''', (my_repe[0][0] + 1, str(datetime.datetime.now()), team))
+
+    dict_cursor.execute("SELECT * FROM `lesson_plan` WHERE id = %s",lesson_id)
+    myLesson = dict_cursor.fetchone()
+
+    if myLesson:
+        c.execute("UPDATE `lesson_plan` SET name = %s, date = %s, updated_at = %s",(data['name'],data['date'],str(datetime.datetime.now())))
         db.commit()
-    except:
-        db.rollback()
+        db.close()
+        return jsonify(
+            {
+                "values": "Lesson " + myLesson['name'] + " has changed",
+                "success": True,
+                "errorMessage": "",
+                "message": None
+            }
+        )
+    return jsonify(
+        {
+            "values": "",
+            "success": False,
+            "errorMessage": "Invalid lesson",
+            "message": None
+        }
+    )
+
+def delete(lesson_id):
+    db,c =connector.connection()
+    dict_cursor = connector.getDictCursor()
+
+    dict_cursor.execute("SELECT * FROM `lesson_plan` WHERE id = %s", lesson_id)
+    myLesson = dict_cursor.fetchone()
+
+    if myLesson:
+        c.execute("DELETE FROM `lesson_plan` WHERE id = %s",lesson_id)
+        c.execute("DELETE FROM `exercise` WHERE lesson_id = %s",lesson_id)
+        db.commit()
+        db.close()
+        return jsonify(
+            {
+                "values": "Lesson " + myLesson['name'] + " has deleted",
+                "success": True,
+                "errorMessage": "",
+                "message": None
+            }
+        )
+    return jsonify(
+        {
+            "values": "",
+            "success": False,
+            "errorMessage": "Invalid lesson",
+            "message": None
+        }
+    )
+
 
 

@@ -16,4 +16,5 @@ def getDistance():
    columns = ['id','swim_distance']
    #columns = [column[0] for column in c.description]        #get keys in db
    info =[dict(zip(columns, row)) for row in myDistance]        #create zip with key & value => convert dict
+   db.close()
    return jsonify(info)
