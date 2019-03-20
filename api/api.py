@@ -6,6 +6,8 @@
 from flask import Flask, jsonify, request
 import account
 import distance
+import exercise
+import lesson
 import record
 import style
 import team
@@ -162,16 +164,36 @@ def __get_distance__():
 def __get_style__():
     return style.getStyle()
 
+@app.route('/public/type')
+def __get_type_exercise():
+    return exercise.getType()
+
 @app.route('/team/<username>/<team_name>/record/add',methods=['POST'])
 @jwt_required
 def __add_record__(username,team_name):
     check_user(get_jwt_identity(),username)
     return record.addRecord(request.get_json())
 
+@app.route('/workout/<username>/<team_id>/add',methods=['POST'])
+def __add_lesson__(username,team_id):
+    return lesson.add(request.get_json(), username, team_id)
+
+@app.route('/workout/<username>/<team_id>/<lesson_id>/edit',methods=['POST'])
+def __edit_lesson__(username,team_id,lesson_id):
+    return lesson.edit(request.get_json(),username,team_id,lesson_id)
+@app.route('/workout/<username>/<team_id>/<lesson_id>/delete')
+def __delete_lesson__(username,team_id,lesson_id):
+    return lesson.delete(lesson_id)
+
+@app.route('/workout/<username>/<team_id>/<lesson_id>/add',methods=['POST'])
+def __add_exercise__(username,team_id,lesson_id):
+    return exercise.add(request.get_json(),lesson_id)
+
+
+
 @app.route('/')
 def __root__():
     return '<h1>Nắm bắt vận mệnh, khai phá thiên cơ</h1>'
-
 
 # running web app in local machine
 if __name__ == '__main__':
