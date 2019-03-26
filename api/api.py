@@ -12,6 +12,7 @@ import record
 import style
 import team
 import age
+import lesson_plan
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 import datetime
 from authentication import check_user
@@ -49,20 +50,12 @@ def __forgot_password__(identity):
     return account.forgot_password(request.get_json())
 
 
-@app.route('/api/<username>/createswimmer1/<number>')
+@app.route('/api/<username>/createswimmer/<number>')
 # auto create swimmer
 @jwt_required
-def __swimmer_creation1__(number, username):
+def __swimmer_creation__(number, username):
     check_user(get_jwt_identity(), username)
-    return account.swimmer_creation1(number)
-
-
-@app.route('/api/<username>/createswimmer2/', methods=['POST'])
-# auto create swimmer
-@jwt_required
-def __swimmer_creation2__(username):
-    check_user(get_jwt_identity(), username)
-    return account.swimmer_creation2(request.get_json())
+    return account.swimmer_creation(number, username)
 
 
 @app.route('/api/<username>/deleteswimmeraccount/<swimmer_username>')
@@ -168,44 +161,61 @@ def __delete_swimmer__(username, team_id, id):
 def __get_distance__():
     return distance.getDistance()
 
+
 @app.route('/public/style')
 def __get_style__():
     return style.getStyle()
+
 
 @app.route('/public/type')
 def __get_type_exercise():
     return exercise.getType()
 
-@app.route('/team/<username>/<team_name>/record/add',methods=['POST'])
-@jwt_required
-def __add_record__(username,team_name):
-    check_user(get_jwt_identity(),username)
-    return record.addRecord(request.get_json())
 
-@app.route('/workout/<username>/add',methods=['POST'])
+@app.route('/workout/<username>/add', methods=['POST'])
 def __add_lesson__(username):
     return lesson.add(request.get_json(), username)
 
-@app.route('/workout/<username>/view')
-def __view_lesson__(username):
-    return lesson.view(username,request.get_json())
 
-@app.route('/workout/<username>/<team_id>/<lesson_id>/edit',methods=['POST'])
-def __edit_lesson__(username,team_id,lesson_id):
-    return lesson.edit(request.get_json(),username,team_id,lesson_id)
-@app.route('/workout/<username>/<team_id>/<lesson_id>/delete')
-def __delete_lesson__(username,team_id,lesson_id):
+@app.route('/workout/<username>/lesson/view')
+def __view_lesson__(username):
+    return lesson.view(username)
+
+
+@app.route('/workout/<username>/edit/<lesson_id>', methods=['POST'])
+def __edit_lesson__(username, lesson_id):
+    return lesson.edit(request.get_json(), username, lesson_id)
+
+
+@app.route('/workout/<username>/delete/<lesson_id>')
+def __delete_lesson__(username, lesson_id):
     return lesson.delete(lesson_id)
 
-@app.route('/workout/<username>/<team_id>/<lesson_id>/add',methods=['POST'])
-def __add_exercise__(username,team_id,lesson_id):
-    return exercise.add(request.get_json(),lesson_id)
 
+@app.route('/workout/<username>/exercise/add/<lesson_id>', methods=['POST'])
+def __add_exercise__(username, lesson_id):
+    return exercise.addListExercise(request.get_json(), lesson_id)
+
+
+@app.route('/workout/<username>/lessonplan/add/<lesson_id>/<team_id>', methods=['POST'])
+def __add_lesson_plan__(username, lesson_id, team_id):
+    return lesson_plan.add(username, lesson_id, team_id, request.get_json())
+
+
+@app.route('/workout/<username>/lessonplan/view/<team_id>')
+def __view_lesson_plan__(username, team_id):
+    return lesson_plan.view(team_id)
+
+
+@app.route('/record/<username>/add', methods=['POST'])
+def __add_record__(username):
+    return record.add(username, request.get_json())
 
 
 @app.route('/')
 def __root__():
     return '<h1>Nắm bắt vận mệnh, khai phá thiên cơ</h1>'
+
 
 # running web app in local machine
 if __name__ == '__main__':

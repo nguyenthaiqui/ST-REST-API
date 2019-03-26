@@ -10,23 +10,60 @@ import connector
 from json import dumps
 from JSONObject import json2obj
 
-def addRecord(js_data):
-    """input json include keys : username, style, distance, milisec, sec, min"""
+
+def add(username, data):
+    '''input json key : lesson_id,repetition, username, exercise_id, swim_millisec, swim_sec, swim_min, heart_beat_id '''
+
     db, c = connector.connection()
     dict_cursor = connector.getDictCursor()
-    dict_cursor.execute("SELECT id FROM distance WHERE swim_distance = %s", js_data['distance'])
-    myDistanceID = dict_cursor.fetchone()
-    dict_cursor.execute("SELECT id FROM style WHERE swim_name = %s", js_data['style'])
-    myStyleID = dict_cursor.fetchone()
-    dict_cursor.execute("SELECT id FROM `user` WHERE username = %s AND role_id = %s", (js_data['username'],2))
-    myUserID = dict_cursor.fetchone()
-    if myUserID:
-        values = (js_data['milisec'], js_data['sec'], js_data['min'], myDistanceID['id'], myStyleID['id'], js_data['date'], myUserID['id'])
-        c.execute("INSERT INTO `record`(swim_milisec,swim_sec,swim_min,style_id,distance_id,date_id,user_id) "
-                  "VALUES(%s,%s,%s,%s,%s,%s,%s)",values)
-        return jsonify({"result":"success"})
-    else:
-        return jsonify({"result":"fail","message":"Unknow user"})
-    return  jsonify({"result":"fail"})
 
+    dict_cursor.execute("SELECT * FROM `user` WHERE username = %s", username)
+    coach = dict_cursor.fetchone()
 
+    for i in data:
+        dict_cursor.execute("SELECT * FROM `user` WHERE username = %s AND role_id = %s", (i['username'], 2))
+        user = dict_cursor.fetchone()
+
+        dict_cursor.execute("SELECT * FROM `lesson_plan` WHERE id = %s AND coach_id = %s", (i['lesson_id'],coach['id']))
+        myLesson = dict_cursor.fetchone()
+
+        if not myLesson:
+            db.close()
+            return jsonify(
+                {
+                    "values": "",
+                    "success": False,
+                    "errorMessage": "Invalid lesson_name",
+                    "message": None
+                }
+            )
+        dict_cursor.execute("SELECT COUNT(*) FROM `record` WHERE user_id = %s AND lesson_id =%s AND exercise_id= %s",
+                            (user['id'], myLesson['id'], i['exercise_id']))
+        myRep = dict_cursor.fetchone()['COUNT(*)']
+        dict_cursor.execute("SELECT * FROM `exercise` WHERE lesson_id = %s",myLesson['id'])
+        myExercise = dict_cursor.fetchone()
+        if myRep < myExercise['repetition']:
+            c.execute(
+                "INSERT INTO `record` (swim_millisec,swim_sec,swim_min,heart_beat_id,exercise_id,lesson_id,user_id,coach_id) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s,%s)",
+                (i['swim_millisec'], i['swim_sec'], i['swim_min'], i['heart_beat_id'], i['exercise_id'],myLesson['id'],user['id'],coach['id']))
+            db.commit()
+        else:
+            db.close()
+            return jsonify(
+                {
+                    "values": "",
+                    "success": False,
+                    "errorMessage": "Max record of lesson : "+myLesson['name'],
+                    "message": None
+                }
+            )
+    db.close()
+    return jsonify(
+        {
+            "values": "added records in lesson: " + myLesson['name'],
+            "success": True,
+            "errorMessage": "",
+            "message": None
+        }
+    )

@@ -19,15 +19,14 @@ def getType():
     db.close()
     return jsonify(info)
 
-def add(data,lesson_id):
+def addListExercise(data, lesson_id):
     db,c = connector.connection()
-    dict_cursos = connector.getDictCursor()
+    dict_cursor = connector.getDictCursor()
 
-    dict_cursos.execute("SELECT * FROM `lesson_plan` WHERE id = %s",lesson_id)
-    myLesson = dict_cursos.fetchone()
+    dict_cursor.execute("SELECT * FROM `lesson` WHERE id = %s",lesson_id)
+    myLesson = dict_cursor.fetchone()
 
-    c.execute("SELECT * FROM `lesson_plan` WHERE id = %s",lesson_id)
-    if not c.fetchall():
+    if not myLesson:
         db.close()
         return jsonify(
             {
@@ -37,27 +36,41 @@ def add(data,lesson_id):
                 "message": None
             }
         )
-
-    c.execute("SELECT * FROM `exercise` WHERE type = %s AND lesson_id = %s",(data['type_name'],lesson_id))
-    if not c.fetchall():
-        c.execute("INSERT INTO `exercise` (style,distance,repetition,description,type,lesson_id) VALUES(%s,%s,%s,%s,%s,%s)",
-                  (data['swim_name'],data['swim_distance'],data['repetition'],data['description'],data['type_name'],lesson_id))
-        db.commit()
-        db.close()
-        return jsonify(
-            {
-                "values": ""+ myLesson['name'] +" added "+ data['type_name'] + ": "+data['repetition']+"x"+data['swim_distance']+" "+data['swim_name'],
-                "success": True,
-                "errorMessage": "",
-                "message": None
-            }
-        )
+    for i in data:
+        dict_cursor.execute("SELECT * FROM `exercise_type` WHERE id = %s", i['type_id'])
+        myType = dict_cursor.fetchone()
+        c.execute("SELECT * FROM `exercise` WHERE type_id = %s AND lesson_id = %s",(i['type_id'],lesson_id))
+        if not c.fetchall():
+            c.execute("INSERT INTO `exercise` (style_id,distance_id,repetition,description,type_id,lesson_id) VALUES(%s,%s,%s,%s,%s,%s)",
+                      (i['style_id'],i['distance_id'],i['repetition'],i['description'],i['type_id'],lesson_id))
+            db.commit()
+        else:
+            db.close()
+            return jsonify(
+                {
+                    "values": "",
+                    "success": False,
+                    "errorMessage": "",
+                    "message": None
+                }
+            )
     db.close()
     return jsonify(
         {
-            "values": "",
-            "success": False,
-            "errorMessage": ""+ myLesson['name'] +" already have "+data['type_name'],
+            "values": "added",
+            "success": True,
+            "errorMessage": "",
             "message": None
         }
+    )
+def view(lesson_id):
+    db, c = connector.connection()
+    dict_cursos = connector.getDictCursor()
+
+    dict_cursos.execute("SELECT * FROM `exercise` WHERE lesson_id= %s", lesson_id)
+    myExercise=dict_cursos.fetchall()
+    return jsonify(
+        [
+            myExercise
+        ]
     )
