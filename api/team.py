@@ -26,10 +26,13 @@ def add(username, data):
             value = (myData[0][0], object_data.team.name, object_data.team.age)
             c.execute(sql, value)
             db.commit()
+            c.excute("select id from team where name = %s", object_data.team.name)
+            my_id = c.fetchall()
             return jsonify(
                 {
                     "values": "Team :"+ object_data.team.name + " has created",
                     "success": True,
+                    "team_id": my_id,
                     "errorMessage": "",
                     "message": None
                 }
@@ -60,7 +63,7 @@ def view(username):
     if myData:
         c.execute("SELECT * FROM team WHERE coach_id = %s ", myData[0][0])
         myData2 = c.fetchall()
-        columns = ['id', 'coach_id', 'name', 'age']
+        columns = ['team_id', 'coach_id', 'name', 'age']
         info = [dict(zip(columns, row)) for row in myData2]
         return jsonify(
             {
