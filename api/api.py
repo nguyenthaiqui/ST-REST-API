@@ -49,12 +49,20 @@ def __forgot_password__(identity):
     return account.forgot_password(request.get_json())
 
 
-@app.route('/api/<username>/createswimmer/<number>')
+@app.route('/api/<username>/createswimmer1/<number>')
 # auto create swimmer
 @jwt_required
-def __swimmer_creation__(number, username):
+def __swimmer_creation1__(number, username):
     check_user(get_jwt_identity(), username)
-    return account.swimmer_creation(number, username)
+    return account.swimmer_creation1(number)
+
+
+@app.route('/api/<username>/createswimmer2/', methods=['POST'])
+# auto create swimmer
+@jwt_required
+def __swimmer_creation2__(username):
+    check_user(get_jwt_identity(), username)
+    return account.swimmer_creation2(request.get_json())
 
 
 @app.route('/api/<username>/deleteswimmeraccount/<swimmer_username>')

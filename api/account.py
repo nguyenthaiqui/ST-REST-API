@@ -6,8 +6,6 @@
 '''
 import connector
 from flask import jsonify
-from JSONObject import json2obj  # json2obj recive a string
-from json import dumps
 import random
 import datetime
 import base64
@@ -92,7 +90,7 @@ def register(js_data):
 		hashed_pw = bcrypt.hashpw(
 			js_data['password'].encode(), bcrypt.gensalt())  # hash password by bcrypt
 		try:
-			c.execute('''INSERT INTO 
+			c.execute('''INSERT INTO
 				user (username, password, first_name, last_name, dob, gender,
 				address, phone, email, role_id, is_verified, created_at)
 				VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''',
@@ -114,7 +112,7 @@ def register(js_data):
 			)
 	dict_cursor.execute('SELECT id, password FROM user WHERE username = %s',
 					  js_data['username'])
-	db_data2 = dict_cursor.fetchone()
+	db_data2 = dict_cursor.fetchone() # db_data2 is id and password for user
 	return jsonify(
 		{
 			"values": {
@@ -135,41 +133,61 @@ def register(js_data):
 		}
 	)
 
-
-def swimmer_creation(number_of_swimmer, username):  # GET methods
-	"""receive number of swimmer need to create"""
+def swimmer_creation1(number_of_swimmer):
 	db, c = connector.connection()
 	dict_cursor = connector.getDictCursor()
-	my_account_list = ""  # this string store account has been created
+	list_swimmer_account = []
 	i = 0
 	while i < int(number_of_swimmer):
 		rand_num = str(random.randint(1, 9999)).zfill(4)  # format 55 to 0055
 		this_year = str(datetime.datetime.now().year)  # get this year
 		randuser = 'st' + this_year + '_' + rand_num  # format st<this year>_<random number>
+		my_dict = {"username": randuser, "password": "1"}
 		dict_cursor.execute(
 			'SELECT username FROM user WHERE username = %s', randuser)
 		my_username = dict_cursor.fetchone()
-		if not my_username:  # check duplication
-			try:
-				c.execute('''INSERT INTO user (username, password, 
-					role_id, is_verified, created_at, dob) VALUES (%s, %s, %s, %s, %s, %s)''',
-					(randuser, '1', 2, 0, str(datetime.datetime.now()), '2000-1-1'))
-				# add account to string
-				my_account_list += ('tai khoan: ' + randuser +
-									'\n' + 'mat khau: ' + '1' + '\n' + '-' * 40 + '\n')
-				db.commit()
-			except:
-				db.rollback()
-				return jsonify(
-					{
-						"values": "Error",
-						"success": False,
-						"errorMessage": "Something went wrong.",
-						"message": None,
-						"created_date": str(datetime.datetime.now())
-					}
-				)
+		if not my_username:
+			list_swimmer_account.append(my_dict)
 			i += 1
+	return jsonify(
+		{
+			"values":
+				{
+					"swimmers": list_swimmer_account
+				},
+			"success": True,
+			"errorMessage": None,
+			"message": "Accepted.",
+			"created_date": str(datetime.datetime.now())
+		}
+	)
+
+
+def swimmer_creation2(js_data):  # GET methods
+	"""receive number of swimmer need to create"""
+	db, c = connector.connection()
+	dict_cursor = connector.getDictCursor()
+	my_account_list = ""
+	for swimmer in js_data['swimmers']:
+		try:
+			c.execute('''INSERT INTO user (username, password,
+				role_id, is_verified, created_at, dob) VALUES (%s, %s, %s, %s, %s, %s)''',
+				(swimmer['username'], swimmer['password'], 2, 0, str(datetime.datetime.now()), '2000-1-1'))
+			# add account to string
+			my_account_list += ('tai khoan: ' + swimmer['username'] +
+								'\n' + 'mat khau: ' + swimmer['password'] + '\n' + '-' * 40 + '\n')
+			db.commit()
+		except:
+			db.rollback()
+			return jsonify(
+				{
+					"values": "Error",
+					"success": False,
+					"errorMessage": "Something went wrong.",
+					"message": None,
+					"created_date": str(datetime.datetime.now())
+				}
+			)
 	# the next 4 lines store account to swimmer.txt
 	f = open('swimmer.txt', 'w')
 	temp = '-' * 40 + '\n' + my_account_list
@@ -178,7 +196,7 @@ def swimmer_creation(number_of_swimmer, username):  # GET methods
 	f.write(str(encoded.decode()))
 	return jsonify(
 		{
-			"values": number_of_swimmer + " swimmer created by " + username +".",
+			"values": "Swimmer created.",
 			"success": True,
 			"errorMessage": None,
 			"message": "Accepted.",
@@ -283,8 +301,8 @@ def change_password(username, js_data):
 
 
 def edit_info(username, js_data):
-	'''	username is GET method, 
-		js_data are 
+	'''	username is GET method,
+		js_data are
 		first_name, last_name, gender, dob, weight,
 		height, address, phone, email, parent_name, parent_phone
 		protected'''
@@ -328,7 +346,7 @@ def send_email_to_change_password(email):
 	db, c = connector.connection()
 	dict_cursor = connector.getDictCursor()
 	try:
-		dict_cursor.execute('SELECT username, password, last_name FROM user WHERE email = %s', 
+		dict_cursor.execute('SELECT username, password, last_name FROM user WHERE email = %s',
 			email)
 	except:
 		return jsonify(
@@ -383,7 +401,7 @@ def forgot_password(js_data):
 	# hash new password
 	hashed_pw = bcrypt.hashpw(js_data['new_password'].encode(), bcrypt.gensalt())
 	try:
-		c.execute('UPDATE user SET password = %s WHERE username = %s', 
+		c.execute('UPDATE user SET password = %s WHERE username = %s',
 			(hashed_pw, js_data['username']))
 		db.commit()
 		return jsonify(
