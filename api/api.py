@@ -5,6 +5,7 @@
 '''
 from flask import Flask, jsonify, request
 import account
+import diary
 import distance
 import exercise
 import lesson
@@ -210,6 +211,15 @@ def __view_lesson_plan__(username, team_id):
 @app.route('/record/<username>/add', methods=['POST'])
 def __add_record__(username):
     return record.add(username, request.get_json())
+
+@app.route('/diary/<username>/add',methods=['POST'])
+def __add_diary__(username):
+    return diary.add(username,request.get_json())
+
+@app.route('/diary/<username>/view/<team_id>')
+def __view_diary__(username,team_id):
+    return diary.view(username,team_id)
+
 
 
 @app.route('/')
