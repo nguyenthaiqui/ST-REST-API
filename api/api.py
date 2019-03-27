@@ -58,7 +58,7 @@ def __swimmer_creation__(number, username):
     return account.swimmer_creation(number)
 
 
-@app.route('/api/<username>/createswimmer/', methods=['POST'])
+@app.route('/api/<username>/addswimmer/', methods=['POST'])
 # add swimmer to db
 @jwt_required
 def __swimmer_add__(number, username):
@@ -222,7 +222,7 @@ def __add_record__(username):
 
 @app.route('/')
 def __root__():
-    return '<h1>Nắm bắt vận mệnh, khai phá thiên cơ</h1>'
+    return '<h1>SwimTracker RESTful API</h1>'
 
 
 # running web app in local machine
