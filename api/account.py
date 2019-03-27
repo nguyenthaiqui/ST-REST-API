@@ -133,7 +133,7 @@ def register(js_data):
 		}
 	)
 
-def swimmer_creation1(number_of_swimmer):
+def swimmer_creation(number_of_swimmer):
 	db, c = connector.connection()
 	dict_cursor = connector.getDictCursor()
 	list_swimmer_account = []
@@ -163,7 +163,7 @@ def swimmer_creation1(number_of_swimmer):
 	)
 
 
-def swimmer_creation2(js_data):  # GET methods
+def swimmer_add(js_data):  # GET methods
 	"""receive number of swimmer need to create"""
 	db, c = connector.connection()
 	dict_cursor = connector.getDictCursor()

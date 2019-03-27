@@ -82,7 +82,7 @@ def sendText(email_send, last_name, reset_password_token):
     body += 'Nếu bạn không yêu cầu thay đổi mật khẩu, làm ơn bỏ qua tin nhắn này hoặc\n'
     body += 'trả lời cho chúng tôi biết. Mã PIN sẽ chỉ tồn tại trong 30 phút.\n'
     body += 'Chân thành cám ơn!\n'
-    body += 'QDVL Team'
+    body += 'SwimTracker Develope Team'
     msg.attach(MIMEText(body.encode('utf-8'), 'plain', 'utf-8'))
     text = msg.as_string()
     server = smtplib.SMTP('smtp.gmail.com', 587)

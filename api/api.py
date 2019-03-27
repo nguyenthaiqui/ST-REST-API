@@ -55,7 +55,15 @@ def __forgot_password__(identity):
 @jwt_required
 def __swimmer_creation__(number, username):
     check_user(get_jwt_identity(), username)
-    return account.swimmer_creation(number, username)
+    return account.swimmer_creation(number)
+
+
+@app.route('/api/<username>/createswimmer/', methods=['POST'])
+# add swimmer to db
+@jwt_required
+def __swimmer_add__(number, username):
+    check_user(get_jwt_identity(), username)
+    return account.swimmer_add(number)
 
 
 @app.route('/api/<username>/deleteswimmeraccount/<swimmer_username>')
