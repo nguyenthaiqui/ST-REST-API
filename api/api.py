@@ -63,7 +63,7 @@ def __swimmer_creation__(number, username):
 @jwt_required
 def __swimmer_add__(number, username):
     check_user(get_jwt_identity(), username)
-    return account.swimmer_add(number)
+    return account.swimmer_add(request.get_json())
 
 
 @app.route('/api/<username>/deleteswimmeraccount/<swimmer_username>')
