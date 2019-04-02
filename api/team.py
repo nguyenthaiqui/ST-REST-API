@@ -16,6 +16,7 @@ def add(username, data):
     """recieve json with key(name,age)
         return json key (result)"""
     db, c = connector.connection()
+    dict_cursosr = connector.getDictCursor()
     c.execute("SELECT id FROM user WHERE username = %s", username)
     myData = c.fetchall()
     if myData:
@@ -26,13 +27,13 @@ def add(username, data):
             value = (myData[0][0], object_data.team.name, object_data.team.age)
             c.execute(sql, value)
             db.commit()
-            c.excute("select id from team where name = %s", object_data.team.name)
-            my_id = c.fetchall()
+            dict_cursosr.execute("select id from team where name = %s", object_data.team.name)
+            my_id = dict_cursosr.fetchone()
             return jsonify(
                 {
                     "values": "Team :"+ object_data.team.name + " has created",
                     "success": True,
-                    "team_id": my_id,
+                    "team_id": my_id['id'],
                     "errorMessage": "",
                     "message": None
                 }

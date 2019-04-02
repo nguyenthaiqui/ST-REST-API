@@ -58,10 +58,10 @@ def __swimmer_creation__(number, username):
     return account.swimmer_creation(number)
 
 
-@app.route('/api/<username>/createswimmer/', methods=['POST'])
+@app.route('/api/<username>/addswimmer', methods=['POST'])
 # add swimmer to db
 @jwt_required
-def __swimmer_add__(number, username):
+def __swimmer_add__(username):
     check_user(get_jwt_identity(), username)
     return account.swimmer_add(request.get_json())
 
@@ -180,7 +180,7 @@ def __get_type_exercise():
     return exercise.getType()
 
 
-@app.route('/workout/<username>/add', methods=['POST'])
+@app.route('/workout/<username>/lesson/add', methods=['POST'])
 def __add_lesson__(username):
     return lesson.add(request.get_json(), username)
 
