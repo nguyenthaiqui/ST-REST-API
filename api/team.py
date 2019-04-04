@@ -96,7 +96,7 @@ def view(username):
 
 
 def edit(username,team_id, data):
-    """recieve json with keys(name, age) return json with key(result)"""
+    '''recieve json with keys(name, age) return json with key(result)'''
     db, c = connector.connection()
     dict_cursor = connector.getDictCursor()
     dict_cursor.execute("SELECT id FROM user WHERE username = %s", username)
