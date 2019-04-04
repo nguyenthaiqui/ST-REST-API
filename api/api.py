@@ -5,6 +5,7 @@
 '''
 from flask import Flask, jsonify, request
 import account
+import diary
 import distance
 import exercise
 import lesson
@@ -190,19 +191,14 @@ def __view_lesson__(username):
     return lesson.view(username)
 
 
-@app.route('/workout/<username>/edit/<lesson_id>', methods=['POST'])
+@app.route('/workout/<username>/lesson/edit/<lesson_id>', methods=['POST'])
 def __edit_lesson__(username, lesson_id):
     return lesson.edit(request.get_json(), username, lesson_id)
 
 
-@app.route('/workout/<username>/delete/<lesson_id>')
+@app.route('/workout/<username>/lesson/delete/<lesson_id>')
 def __delete_lesson__(username, lesson_id):
     return lesson.delete(lesson_id)
-
-
-@app.route('/workout/<username>/exercise/add/<lesson_id>', methods=['POST'])
-def __add_exercise__(username, lesson_id):
-    return exercise.addListExercise(request.get_json(), lesson_id)
 
 
 @app.route('/workout/<username>/lessonplan/add/<lesson_id>/<team_id>', methods=['POST'])
@@ -220,9 +216,22 @@ def __add_record__(username):
     return record.add(username, request.get_json())
 
 
+@app.route('/diary/<username>/add',methods=['POST'])
+def __add_diary__(username):
+    return diary.add(request.get_json())
+
+@app.route('/diary/<username>/view/<lesson_id>')
+def __view_diary__(username,lesson_id):
+    return diary.view(lesson_id)
+
+@app.route('/diary/<username>/edit/<diary_id>',methods=['POST'])
+def __edit_diary__(username,diary_id):
+    return diary.edit(diary_id,request.get_json())
+
 @app.route('/')
 def __root__():
     return '<h1>Nắm bắt vận mệnh, khai phá thiên cơ</h1>'
+
 
 
 # running web app in local machine

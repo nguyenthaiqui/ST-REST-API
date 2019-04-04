@@ -8,25 +8,31 @@ import connector
 from flask import jsonify
 import datetime
 
+
 def view(username):
-    db,c =connector.connection()
     dict_cursor = connector.getDictCursor()
+    try:
+        dict_cursor.execute("SELECT id FROM `user` WHERE username = %s", username)
+        coach = dict_cursor.fetchone()
 
-    dict_cursor.execute("SELECT id FROM `user` WHERE username = %s", username)
-    coach = dict_cursor.fetchone()
+        dict_cursor.execute("SELECT * FROM `lesson` WHERE coach_id = %s", coach['id'])
+        myListLesson = dict_cursor.fetchall()
+    except:
+        return jsonify(
+            {
+                "values": "",
+                "success": False,
+                "errorMessage": "",
+                "message": None
+            }
+        )
 
-    dict_cursor.execute("SELECT * FROM `lesson` WHERE coach_id = %s", coach['id'])
-    myListLesson = dict_cursor.fetchall()
-
-    for i in myListLesson:
-        dict_cursor.execute("SELECT name FROM `team` WHERE coach_id = %s", i['coach_id'])
-
-    db.close()
+    dict_cursor.close()
     return jsonify(myListLesson)
 
 
-
 def add(data, username):
+    '''Json include keys : lesson_name, exercise (value is array include keys : style, distance,repetition,description,type_id)'''
     db, c = connector.connection()
     dict_cursor = connector.getDictCursor()
 
@@ -40,6 +46,7 @@ def add(data, username):
         db.commit()
     dict_cursor.close()
     db.close()
+    c.close()
     db2, c = connector.connection()
     dict_cursor2 = connector.getDictCursor()
     dict_cursor2.execute("SELECT * FROM `lesson` WHERE name = %s", data['lesson_name'])
@@ -58,11 +65,12 @@ def add(data, username):
         else:
             dict_cursor2.close()
             db2.close()
+            c.close()
             return jsonify(
                 {
                     "values": "",
                     "success": False,
-                    "errorMessage": "",
+                    "errorMessage": "type_id exist",
                     "message": None
                 }
             )
@@ -77,15 +85,16 @@ def add(data, username):
     )
 
 
-def edit(data,username,lesson_id):
-    db,c = connector.connection()
+def edit(data, username, lesson_id):
+    db, c = connector.connection()
     dict_cursor = connector.getDictCursor()
 
-    dict_cursor.execute("SELECT * FROM `lesson` WHERE id = %s",lesson_id)
+    dict_cursor.execute("SELECT * FROM `lesson` WHERE id = %s", lesson_id)
     myLesson = dict_cursor.fetchone()
 
     if myLesson:
-        c.execute("UPDATE `lesson` SET name = %s, updated_at = %s WHERE id = %s",(data['name'],str(datetime.datetime.now()),lesson_id))
+        c.execute("UPDATE `lesson` SET name = %s, updated_at = %s WHERE id = %s",
+                  (data['name'], str(datetime.datetime.now()), lesson_id))
         db.commit()
         db.close()
         return jsonify(
@@ -105,16 +114,17 @@ def edit(data,username,lesson_id):
         }
     )
 
+
 def delete(lesson_id):
-    db,c =connector.connection()
+    db, c = connector.connection()
     dict_cursor = connector.getDictCursor()
 
     dict_cursor.execute("SELECT * FROM `lesson` WHERE id = %s", lesson_id)
     myLesson = dict_cursor.fetchone()
 
     if myLesson:
-        c.execute("DELETE FROM `lesson` WHERE id = %s",lesson_id)
-        c.execute("DELETE FROM `exercise` WHERE lesson_id = %s",lesson_id)
+        c.execute("DELETE FROM `lesson` WHERE id = %s", lesson_id)
+        c.execute("DELETE FROM `exercise` WHERE lesson_id = %s", lesson_id)
         db.commit()
         db.close()
         return jsonify(
@@ -133,6 +143,3 @@ def delete(lesson_id):
             "message": None
         }
     )
-
-
-
