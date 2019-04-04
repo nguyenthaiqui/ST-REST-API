@@ -8,7 +8,9 @@ import account
 import diary
 import distance
 import exercise
+import heart_beat
 import lesson
+import rank
 import record
 import style
 import team
@@ -177,8 +179,16 @@ def __get_style__():
 
 
 @app.route('/public/type')
-def __get_type_exercise():
+def __get_type_exercise__():
     return exercise.getType()
+
+@app.route('/public/heartbeat')
+def __get_heart_beat__():
+    return heart_beat.getHeartBeat()
+
+@app.route('/public/rank')
+def __get_rank__():
+    return rank.getRank()
 
 
 @app.route('/workout/<username>/lesson/add', methods=['POST'])
@@ -215,7 +225,7 @@ def __view_lesson_plan__(username, team_id):
 def __add_record__(username):
     return record.add(username, request.get_json())
 
-
+'''POST json include keys (username,team_id,lesson_id,date,note,rank_id)'''
 @app.route('/diary/<username>/add',methods=['POST'])
 def __add_diary__(username):
     return diary.add(request.get_json())
@@ -224,6 +234,7 @@ def __add_diary__(username):
 def __view_diary__(username,lesson_id):
     return diary.view(lesson_id)
 
+'''recieve json with keys(name, age) return json with key(result)'''
 @app.route('/diary/<username>/edit/<diary_id>',methods=['POST'])
 def __edit_diary__(username,diary_id):
     return diary.edit(diary_id,request.get_json())
