@@ -147,11 +147,11 @@ def __get_swimmer_no_team__():
     return team.getSwimmerInfoNoTeam("No team")
 
 
-@app.route('/team/<username>/<team_id>/add/<user_id>')
+@app.route('/team/<username>/add/<user_id>',methods=['POST'])
 @jwt_required
-def __add_swimmer_exit__(username, team_id, user_id):
+def __add_swimmer_exit__(username, user_id):
     check_user(get_jwt_identity(), username)
-    return team.addSwimmerExit(team_id, user_id)
+    return team.addSwimmerExit(user_id,request.get_json())
 
 
 @app.route('/team/<username>/<team_id>/delete')
@@ -161,11 +161,11 @@ def __delete_team__(username, team_id):
     return team.delete(username, team_id)
 
 
-@app.route('/team/<username>/<team_id>/delete/<id>')
+@app.route('/team/<username>/<team_id>/delete/<user_id>')
 @jwt_required
-def __delete_swimmer__(username, team_id, id):
+def __delete_swimmer__(username, team_id, user_id):
     check_user(get_jwt_identity(), username)
-    return team.delSwimmer(team_id, id)
+    return team.delSwimmer(team_id, user_id)
 
 
 @app.route('/public/distance')
