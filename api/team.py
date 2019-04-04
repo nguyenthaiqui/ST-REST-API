@@ -186,8 +186,6 @@ def addSwimmer(team_id, data):
             user = result[2]
             dict_cursor.execute("SELECT * FROM user WHERE username = %s",user)
             mySwimmer = dict_cursor.fetchone()
-            # c.execute("SELECT id FROM user WHERE username = %s", user)
-            # myUserID = c.fetchall()
             if (mySwimmer):
                 c.execute("SELECT user_id FROM `team-swimmer` WHERE user_id = %s", mySwimmer['id'])
                 if not c.fetchall():
@@ -206,30 +204,46 @@ def addSwimmer(team_id, data):
     )
 
 
-def addSwimmerExit(team_id, user_id):
+def addSwimmerExit( user_id,data):
     db, c = connector.connection()
     dict_cursor = connector.getDictCursor()
-    dict_cursor.execute("SELECT * FROM `user` WHERE id = %s",user_id)
-    mySwimmer = dict_cursor.fetchone()
-    dict_cursor.execute("SELECT * FROM `team` WHERE id = %s",team_id)
-    myTeam = dict_cursor.fetchone()
-    if myTeam:
-        c.execute("UPDATE `team-swimmer` SET team_id = %s WHERE user_id = %s", (myTeam['id'], user_id))
-        db.commit()
+    dict_cursor.execute("SELECT * FROM `team` WHERE name =%s","No Team")
+    myNoTeam = dict_cursor.fetchone()
+    dict_cursor.execute("SELECT * FROM `team-swimmer` WHERE user_id = %s AND team_id = %s",(user_id,myNoTeam['id']))
+    if dict_cursor.fetchone():
+        dict_cursor.execute("SELECT * FROM `team` WHERE id = %s",data['team_id'])
+        myTeam = dict_cursor.fetchone()
+        if myTeam:
+            c.execute("UPDATE `team-swimmer` SET team_id = %s WHERE user_id = %s", (myTeam['id'], user_id))
+            db.commit()
+            db.close()
+            c.close()
+            dict_cursor.close()
+            dict_cursor2 = connector.getDictCursor()
+            dict_cursor2.execute("SELECT * FROM `team-swimmer` WHERE team_id = %s",myTeam['id'])
+            myTeamAdded = dict_cursor2.fetchall()
+            return jsonify(
+                {
+                    "values":  myTeamAdded,
+                    "success": True,
+                    "errorMessage": "",
+                    "message": None
+                }
+            )
         return jsonify(
             {
-                "values":  mySwimmer['username'] + " added into team : " + myTeam['name'],
-                "success": True,
-                "errorMessage": "",
-                "message": None,
+                "values": "",
+                "success": False,
+                "errorMessage": "Invalid team",
+                "message": None
             }
         )
     return jsonify(
         {
-            "values": "Error",
+            "values": "",
             "success": False,
-            "errorMessage": "Invalid user_id",
-            "message": None,
+            "errorMessage": "Invalid user_id in No Team",
+            "message": None
         }
     )
 
@@ -310,7 +324,7 @@ def delSwimmer(team_id, user_id):
     dict_cursor.execute("SELECT * FROM team WHERE id = %s",team_id)
     myTeam = dict_cursor.fetchone()
     if myTeam:
-        dict_cursor.execute("SELECT * FROM `user` WHERE id = %s", user_id)
+        dict_cursor.execute("SELECT * FROM `user` WHERE id = %s AND role_id = %s", (user_id,2))
         mySwimmer = dict_cursor.fetchone()
         if mySwimmer:
             dict_cursor.execute("SELECT id FROM team where name = %s", "No team")
