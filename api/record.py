@@ -49,6 +49,8 @@ def add(username, data):
                 (i['swim_millisec'], i['swim_sec'], i['swim_min'], i['heart_beat_id'], i['exercise_id'],myLesson['id'],user['id'],coach['id']))
             db.commit()
         else:
+            dict_cursor.close()
+            c.close()
             db.close()
             return jsonify(
                 {
@@ -58,6 +60,8 @@ def add(username, data):
                     "message": None
                 }
             )
+    dict_cursor.close()
+    c.close()
     db.close()
     return jsonify(
         {
