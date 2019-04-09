@@ -101,11 +101,6 @@ def __change_password__(username):
     return account.change_password(username, request.get_json())
 
 
-@app.route('/public/age', methods=['GET'])
-def __get_age__():
-    return age.get()
-
-
 # request is a json must have keys(name,age)
 @app.route('/team/<username>/add', methods=['POST'])
 @jwt_required
@@ -142,16 +137,11 @@ def __get_swimmer_info__(username, team_id):
     return team.getSwimmerInfo(team_id)
 
 
-@app.route('/public/team/noteam')
-def __get_swimmer_no_team__():
-    return team.getSwimmerInfoNoTeam("No team")
-
-
-@app.route('/team/<username>/add/<user_id>',methods=['POST'])
+@app.route('/team/<username>/add/<user_id>', methods=['POST'])
 @jwt_required
 def __add_swimmer_exit__(username, user_id):
     check_user(get_jwt_identity(), username)
-    return team.addSwimmerExit(user_id,request.get_json())
+    return team.addSwimmerExit(user_id, request.get_json())
 
 
 @app.route('/team/<username>/<team_id>/delete')
@@ -168,6 +158,16 @@ def __delete_swimmer__(username, team_id, user_id):
     return team.delSwimmer(team_id, user_id)
 
 
+@app.route('/public/age', methods=['GET'])
+def __get_age__():
+    return age.get()
+
+
+@app.route('/public/team/noteam')
+def __get_swimmer_no_team__():
+    return team.getSwimmerInfoNoTeam("No team")
+
+
 @app.route('/public/distance')
 def __get_distance__():
     return distance.getDistance()
@@ -182,9 +182,11 @@ def __get_style__():
 def __get_type_exercise__():
     return exercise.getType()
 
+
 @app.route('/public/heartbeat')
 def __get_heart_beat__():
     return heart_beat.getHeartBeat()
+
 
 @app.route('/public/rank')
 def __get_rank__():
@@ -225,24 +227,27 @@ def __view_lesson_plan__(username, team_id):
 def __add_record__(username):
     return record.add(username, request.get_json())
 
-'''POST json include keys (username,team_id,lesson_id,date,note,rank_id)'''
-@app.route('/diary/<username>/add',methods=['POST'])
+
+@app.route('/diary/<username>/add', methods=['POST'])
+# POST json include keys (username,team_id,lesson_id,date,note,rank_id)
 def __add_diary__(username):
     return diary.add(request.get_json())
 
+
 @app.route('/diary/<username>/view/<lesson_id>')
-def __view_diary__(username,lesson_id):
+def __view_diary__(username, lesson_id):
     return diary.view(lesson_id)
 
-'''recieve json with keys(name, age) return json with key(result)'''
-@app.route('/diary/<username>/edit/<diary_id>',methods=['POST'])
-def __edit_diary__(username,diary_id):
-    return diary.edit(diary_id,request.get_json())
+
+@app.route('/diary/<username>/edit/<diary_id>', methods=['POST'])
+# recieve json with keys(name, age) return json with key(result)
+def __edit_diary__(username, diary_id):
+    return diary.edit(diary_id, request.get_json())
+
 
 @app.route('/')
 def __root__():
     return '<h1>Nắm bắt vận mệnh, khai phá thiên cơ</h1>'
-
 
 
 # running web app in local machine
