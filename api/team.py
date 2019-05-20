@@ -196,13 +196,14 @@ def delete(username,team_id):
         )
 
 
-def addSwimmer(team_id, data):
+def addSwimmer(team_name, data):
     """Add swimmer account generated into DB"""
     try:
+
         db, c = connector.connection()
         dict_cursor = connector.getDictCursor()
         f = open("swimmer.txt", "r")
-        dict_cursor.execute("SELECT * FROM team WHERE id = %s",team_id)
+        dict_cursor.execute("SELECT * FROM team WHERE name = %s",team_name)
         myTeam = dict_cursor.fetchone()
         if myTeam:
             '''decode file swimmer.txt'''

@@ -8,13 +8,17 @@ import connector
 from flask import jsonify
 import datetime
 
-def add(username,lesson_id,team_id,data):
+def add(username,data):
+    '''JSON include key : lesson_name,team_name,date'''
     db,c = connector.connection()
     dict_cursor = connector.getDictCursor()
-
-    dict_cursor.execute("SELECT * FROM `lesson-team` WHERE team_id = %s AND lesson_id = %s ",(team_id,lesson_id))
+    dict_cursor.execute("SELECT * FROM team where name = %s",data['team_name'])
+    myTeam = dict_cursor.fetchone();
+    dict_cursor.execute("SELECT * FROM lesson WHERE name = %s",data['lesson_name'])
+    myLesson = dict_cursor.fetchone()
+    dict_cursor.execute("SELECT * FROM `lesson-team` WHERE team_id = %s AND lesson_id = %s ",(myTeam['id'],myLesson['id']))
     if not dict_cursor.fetchone():
-        c.execute("INSERT INTO `lesson-team` (lesson_id,team_id,date) VALUES (%s, %s, %s)",(lesson_id,team_id,data['date']))
+        c.execute("INSERT INTO `lesson-team` (lesson_id,team_id,date) VALUES (%s, %s, %s)",(myLesson['id'],myTeam['id'],data['date']))
         db.commit()
         db.close()
         return jsonify(
