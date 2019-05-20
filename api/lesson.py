@@ -86,7 +86,7 @@ def add(data, username):
                 "message": None
             }
         )
-    except:
+    except :
         return jsonify(
             {
                 "values": "ERROR",

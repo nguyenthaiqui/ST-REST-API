@@ -117,7 +117,7 @@ def register(js_data):
 		{
 			"values": {
 				"user": {
-					"id": db_data2['id'],
+					#"id": db_data2['id'],
 					"username": js_data['username'],
 					"email": js_data['email'],
 					"password": db_data2['password'],

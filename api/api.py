@@ -213,9 +213,9 @@ def __delete_lesson__(username, lesson_id):
     return lesson.delete(lesson_id)
 
 
-@app.route('/workout/<username>/lessonplan/add/<lesson_id>/<team_id>', methods=['POST'])
-def __add_lesson_plan__(username, lesson_id, team_id):
-    return lesson_plan.add(username, lesson_id, team_id, request.get_json())
+@app.route('/workout/<username>/lessonplan/add', methods=['POST'])
+def __add_lesson_plan__(username):
+    return lesson_plan.add(username, request.get_json())
 
 
 @app.route('/workout/<username>/lessonplan/view/<team_id>')
