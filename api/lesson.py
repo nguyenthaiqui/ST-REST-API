@@ -96,22 +96,30 @@ def add(data, username):
             }
         )
 
-
-def edit(data, username, lesson_id):
+def edit(data, username):
     db, c = connector.connection()
     dict_cursor = connector.getDictCursor()
 
-    dict_cursor.execute("SELECT * FROM `lesson` WHERE id = %s", lesson_id)
+    dict_cursor.execute("SELECT * FROM `lesson` WHERE id = %s", data['lesson_id'])
     myLesson = dict_cursor.fetchone()
-
     if myLesson:
         c.execute("UPDATE `lesson` SET name = %s, updated_at = %s WHERE id = %s",
-                  (data['name'], str(datetime.datetime.now()), lesson_id))
+                  (data['lesson_name'], str(datetime.datetime.now()), data['lesson_id']))
         db.commit()
+        c.execute("UPDATE `lesson-team` SET date = %s WHERE lesson_id = %s",(data['date'],data['lesson_id']))
+        db.commit()
+        for exercise in data['exercise']:
+            dict_cursor.execute("SELECT * FROM distance WHERE swim_distance = %s", exercise['swim_distance'])
+            myDistanceID = dict_cursor.fetchone()
+            dict_cursor.execute("SELECT * FROM style WHERE swim_name = %s", exercise['swim_name'])
+            myStyleID = dict_cursor.fetchone()
+            c.execute("UPDATE `exercise` SET style_id = %s,distance_id = %s, repetition=%s, description = %s WHERE lesson_id = %s AND type_id = %s",
+                      (myStyleID['id'], myDistanceID['id'], exercise['repetition'], exercise['description'],data['lesson_id'],exercise['type_id']))
+            db.commit()
         db.close()
         return jsonify(
             {
-                "values": "Lesson " + myLesson['name'] + " has changed",
+                "values": "",
                 "success": True,
                 "errorMessage": "",
                 "message": None

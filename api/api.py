@@ -15,6 +15,7 @@ import record
 import style
 import team
 import age
+import test
 import lesson_plan
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 import datetime
@@ -203,9 +204,9 @@ def __view_lesson__(username):
     return lesson.view(username)
 
 
-@app.route('/workout/<username>/lesson/edit/<lesson_id>', methods=['POST'])
-def __edit_lesson__(username, lesson_id):
-    return lesson.edit(request.get_json(), username, lesson_id)
+@app.route('/workout/<username>/lesson/edit', methods=['POST'])
+def __edit_lesson__(username):
+    return lesson.edit(request.get_json(), username)
 
 
 @app.route('/workout/<username>/lesson/delete/<lesson_id>')
@@ -222,32 +223,52 @@ def __add_lesson_plan__(username):
 def __view_lesson_plan__(username, team_id):
     return lesson_plan.view(team_id)
 
+@app.route('/workout/<username>/lessonplan/view')
+def __view_list_lesson_of_coach_lesson_plan__(username):
+    return lesson_plan.viewListLessonOfCoach(username)
+
+
+@app.route('/workout/<username>/lessonplan/view',methods=['POST'])
+def __view_list_lesson_of_date_lesson_plan__(username):
+    return lesson_plan.viewListLessonOfDate(username, request.get_json())
 
 @app.route('/record/<username>/add', methods=['POST'])
 def __add_record__(username):
     return record.add(username, request.get_json())
 
 
-@app.route('/diary/<username>/add', methods=['POST'])
-# POST json include keys (username,team_id,lesson_id,date,note,rank_id)
-def __add_diary__(username):
-    return diary.add(request.get_json())
 
+@app.route('/diary/<username>/add', methods=['POST'])
+def __add_list_diary__(username):
+    return diary.addList(request.get_json())
 
 @app.route('/diary/<username>/view/<lesson_id>')
-def __view_diary__(username, lesson_id):
-    return diary.view(lesson_id)
+def __view_list_diary__(username,lesson_id):
+    return diary.viewList(lesson_id)
 
+@app.route('/diary/<username>/view')
+def __view_diary__(username):
+    return diary.view(username)
+
+@app.route('/diary/<username>/view',methods=['POST'])
+def __view_diary_by_date_(username):
+    return diary.viewByDate(username,request.get_json())
 
 @app.route('/diary/<username>/edit/<diary_id>', methods=['POST'])
 # recieve json with keys(name, age) return json with key(result)
 def __edit_diary__(username, diary_id):
     return diary.edit(diary_id, request.get_json())
 
+@app.route('/workout/<username>/exercise/view',methods=['POST'])
+def __view_exercise(username):
+    return exercise.view(request.get_json())
 
+import datetime as dt
 @app.route('/')
 def __root__():
-    return '<h1>Nắm bắt vận mệnh, khai phá thiên cơ</h1>'
+    #return '<h1>Nắm bắt vận mệnh, khai phá thiên cơ</h1>'
+    now = dt.datetime.now()
+    return jsonify({'now': now.strftime("%Y-%m-%d")})
 
 
 # running web app in local machine

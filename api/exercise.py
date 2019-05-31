@@ -19,3 +19,17 @@ def getType():
     db.close()
     c.close()
     return jsonify(info)
+
+def view(data):
+    db,c = connector.connection()
+    dict_cursor = connector.getDictCursor()
+    dict_cursor.execute("SELECT * FROM lesson WHERE name = %s",data['lesson_name'])
+    myLesson = dict_cursor.fetchone()
+    dict_cursor.execute("SELECT  E.id as exercise_id,type_name,swim_name,swim_distance,repetition,description FROM exercise E,exercise_type ET, distance D,style S WHERE lesson_id = %s AND ET.id=E.type_id AND D.id = E.distance_id AND S.id = E.style_id",myLesson['id'])
+    myExercise = dict_cursor.fetchall()
+    return jsonify(
+        {
+        "lesson_id":myLesson['id'],
+        "exercise":myExercise
+        }
+    )
