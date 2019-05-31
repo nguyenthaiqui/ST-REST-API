@@ -12,42 +12,25 @@ from JSONObject import json2obj
 
 
 
-def add(username, data):
-    '''input json key : lesson_id,repetition, username, exercise_id, swim_millisec, swim_sec, swim_min, heart_beat_id '''
-
+def add(username,data):
+    '''input json key : lesson_id,repetition, username, exercise_id, milisec, sec, min, heart_beat_id '''
     db, c = connector.connection()
     dict_cursor = connector.getDictCursor()
 
     dict_cursor.execute("SELECT * FROM `user` WHERE username = %s", username)
-    coach = dict_cursor.fetchone()
-
-    for i in data:
-        dict_cursor.execute("SELECT * FROM `user` WHERE username = %s AND role_id = %s", (i['username'], 2))
-        user = dict_cursor.fetchone()
-
-        dict_cursor.execute("SELECT * FROM `lesson_plan` WHERE id = %s AND coach_id = %s", (i['lesson_id'],coach['id']))
-        myLesson = dict_cursor.fetchone()
-
-        if not myLesson:
-            db.close()
-            return jsonify(
-                {
-                    "values": "",
-                    "success": False,
-                    "errorMessage": "Invalid lesson_name",
-                    "message": None
-                }
-            )
-        dict_cursor.execute("SELECT COUNT(*) FROM `record` WHERE user_id = %s AND lesson_id =%s AND exercise_id= %s",
-                            (user['id'], myLesson['id'], i['exercise_id']))
+    myCoach = dict_cursor.fetchone()
+    for record in data['record']:
+        dict_cursor.execute("SELECT * FROM `user` WHERE `id`= %s AND role_id = 2",record['user_id'])
+        mySwimmer = dict_cursor.fetchone()
+        dict_cursor.execute("SELECT COUNT(*) FROM `record` WHERE user_id = %s AND exercise_id =%s ",
+                            (mySwimmer['id'], data['exercise_id']))
         myRep = dict_cursor.fetchone()['COUNT(*)']
-        dict_cursor.execute("SELECT * FROM `exercise` WHERE lesson_id = %s",myLesson['id'])
+        dict_cursor.execute("SELECT * FROM `exercise` WHERE id= %s ", data['exercise_id'])
         myExercise = dict_cursor.fetchone()
         if myRep < myExercise['repetition']:
             c.execute(
-                "INSERT INTO `record` (swim_millisec,swim_sec,swim_min,heart_beat_id,exercise_id,lesson_id,user_id,coach_id) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s,%s)",
-                (i['swim_millisec'], i['swim_sec'], i['swim_min'], i['heart_beat_id'], i['exercise_id'],myLesson['id'],user['id'],coach['id']))
+                "INSERT INTO `record` (user_id, coach_id, lesson_id, exercise_id, swim_millisec , swim_sec , swim_min, heart_beat_id ) VALUES (%s, %s, %s, %s, %s, %s, %s ,%s)",
+                (record['user_id'],myCoach['id'],data['lesson_id'],data['exercise_id'], record['millisec'], record['sec'], record['min'], record['heart_beat_id']))
             db.commit()
         else:
             dict_cursor.close()
@@ -57,7 +40,7 @@ def add(username, data):
                 {
                     "values": "",
                     "success": False,
-                    "errorMessage": "Max record of lesson : "+myLesson['name'],
+                    "errorMessage": "",
                     "message": None
                 }
             )
@@ -66,9 +49,10 @@ def add(username, data):
     db.close()
     return jsonify(
         {
-            "values": "added records in lesson: " + myLesson['name'],
+            "values": "",
             "success": True,
             "errorMessage": "",
             "message": None
         }
     )
+

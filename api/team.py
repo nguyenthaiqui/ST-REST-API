@@ -308,11 +308,11 @@ def getSwimmerInfo(team_id):
             c.execute("SELECT user_id FROM `team-swimmer` WHERE team_id = %s", myTeam['id'])
             mySwimmerID = c.fetchall()
             result = []
-            columns = ['id','username','dob' ,'first_name', 'last_name']
+            columns = ['user_id','username','dob' ,'first_name', 'last_name']
             for row in mySwimmerID:
                 dict_cursor.execute("SELECT username,dob,first_name,last_name FROM `user` WHERE id = %s", row[0])
                 mySwimmerInfo = dict_cursor.fetchone()
-                listRow = [row[0],mySwimmerInfo['username'],mySwimmerInfo['dob'], mySwimmerInfo['first_name'], mySwimmerInfo['last_name']]
+                listRow = [row[0],mySwimmerInfo['username'],mySwimmerInfo['dob'].strftime("%Y-%m-%d"), mySwimmerInfo['first_name'], mySwimmerInfo['last_name']]
                 info = dict(zip(columns, listRow))
                 result.append(info)
             return jsonify(
